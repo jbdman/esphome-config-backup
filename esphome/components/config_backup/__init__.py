@@ -46,5 +46,5 @@ def to_code(config):
     print(f"[config_backup] Embedded encrypted config from {input_file} → {output_file}")
 
     # Register the component
-    var = cg.new_Pvariable(config[cv.CONF_ID], ConfigBackup)
+    var = cg.new_Pvariable(config[cv.CONF_ID])
     yield cg.register_component(var, config)
