@@ -4,6 +4,11 @@ from esphome.components import web_server_base
 from esphome.components.web_server_base import CONF_WEB_SERVER_BASE_ID
 from esphome.const import CONF_ID
 from esphome.core import CORE, coroutine_with_priority
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding as aes_padding
+from cryptography.hazmat.backends import default_backend
+import secrets
+
 
 import os
 import base64
@@ -19,7 +24,7 @@ CONF_KEY = "key"
 CONF_ENCRYPTION = "encryption"
 CONF_DEBUG = "debug"
 
-ENCRYPTION_TYPES = ["none", "xor"]
+ENCRYPTION_TYPES = ["none", "xor", "aes256"]
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -37,6 +42,18 @@ CODEOWNERS = ["@jbdman"]
 
 def xor_encrypt(data: bytes, key: bytes) -> bytes:
     return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
+
+def aes256_encrypt(data: bytes, key: bytes) -> bytes:
+    if len(key) not in (16, 24, 32):
+        raise ValueError("AES key must be 16, 24, or 32 bytes long")
+    iv = secrets.token_bytes(16)
+    padder = aes_padding.PKCS7(128).padder()
+    padded = padder.update(data) + padder.finalize()
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    encrypted = encryptor.update(padded) + encryptor.finalize()
+    return iv + encrypted  # prepend IV for decoder
+
 
 @coroutine_with_priority(64.0)
 async def to_code(config):
@@ -58,6 +75,11 @@ async def to_code(config):
             raise cv.Invalid("Encryption type 'xor' requires a 'key' to be specified.")
         print("[config_backup] Encrypting config using XOR")
         final_bytes = xor_encrypt(yaml_with_comment, key.encode("utf-8"))
+    elif encryption == "aes256":
+        if not key:
+            raise cv.Invalid("Encryption type 'aes256' requires a 'key' to be specified.")
+        print("[config_backup] Encrypting config using AES-256")
+        final_bytes = aes256_encrypt(yaml_with_comment, key.encode("utf-8"))
     elif encryption == "none":
         print("[config_backup] Embedding config without encryption")
         final_bytes = yaml_with_comment

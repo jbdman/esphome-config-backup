@@ -2,9 +2,21 @@ import argparse
 import base64
 import sys
 import os
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+
 
 def xor_decrypt(data: bytes, key: bytes) -> bytes:
     return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
+
+def aes256_decrypt(data: bytes, key: bytes) -> bytes:
+    if len(data) < 16:
+        raise ValueError("Invalid AES blob (missing IV)")
+    iv = data[:16]
+    ciphertext = data[16:]
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    return unpad(cipher.decrypt(ciphertext), AES.block_size)
+
 
 def extract_filename(blob: bytes) -> (str, bytes):
     # Looks for a line like: "# filename: myfile.yaml"
@@ -37,6 +49,13 @@ def main():
     if args.encryption == "xor" and not args.key:
         print("[!] Error: --encryption xor requires a --key")
         sys.exit(1)
+    elif args.encryption == "aes256":
+        print("[*] Decrypting using AES-256...")
+        try:
+            blob = aes256_decrypt(blob, args.key.encode("utf-8"))
+        except Exception as e:
+            print(f"[!] AES decryption failed: {e}")
+            sys.exit(1)
 
     # Load file or URL
     if args.input.startswith("http://") or args.input.startswith("https://"):
