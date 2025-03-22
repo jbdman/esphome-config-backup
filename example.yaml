@@ -4,13 +4,20 @@ esphome:
   board: esp32dev
 
 external_components:
-  - source: github://yourgithubusername/esphome-config-backup
+  - source: github://jbdman/esphome-config-backup
     components: [ config_backup ]
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_OUT
+  phy_addr: 0
+  power_pin: GPIO5
 
 web_server:
   port: 80
 
-custom_component:
-  - lambda: |-
-      auto backup = new ConfigBackup();
-      return {backup};
+config_backup:
+  encryption: xor
+  key: mysecretkey
