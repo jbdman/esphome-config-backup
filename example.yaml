@@ -19,5 +19,6 @@ web_server:
   port: 80
 
 config_backup:
-  encryption: xor
-  key: mysecretkey
+  encryption: aes256
+  key: 1234567812345678
+  debug: print.b64
