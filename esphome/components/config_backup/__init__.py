@@ -37,9 +37,9 @@ def to_code(config):
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         f.write('#pragma once\n\n')
-        f.write('const char CONFIG_B64[] PROGMEM = R"rawliteral(\n')
+        f.write('const char CONFIG_B64[] PROGMEM = \n"')
         f.write(b64_encoded)
-        f.write('\n)rawliteral";\n')
+        f.write('";\n')
 
     print(f"[config_backup] Embedded encrypted config from {input_file} → {output_file}")
 
