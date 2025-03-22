@@ -2,6 +2,7 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 import os
 import base64
+from esphome.core import CORE
 
 CONFIG_BACKUP_NS = cg.global_ns.namespace("config_backup")
 ConfigBackup = CONFIG_BACKUP_NS.class_("ConfigBackup", cg.Component)
@@ -24,7 +25,7 @@ def to_code(config):
     if not key:
         raise Exception("CONFIG_BACKUP_KEY not set in environment")
 
-    input_file = config["config_path"]
+    input_file = CORE.config_path
     output_file = os.path.join(config["build_path"], "src", "config_embed.h")
 
     with open(input_file, "rb") as f:
