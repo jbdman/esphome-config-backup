@@ -1,9 +1,22 @@
 import argparse
 import base64
 import sys
+import os
 
 def xor_decrypt(data: bytes, key: bytes) -> bytes:
     return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
+
+def extract_filename(blob: bytes) -> (str, bytes):
+    # Looks for a line like: "# filename: myfile.yaml"
+    try:
+        first_line_end = blob.index(b"\n")
+        first_line = blob[:first_line_end].decode("utf-8").strip()
+        if first_line.startswith("# filename:"):
+            filename = first_line[len("# filename:"):].strip()
+            return filename, blob[first_line_end + 1 :]
+    except Exception:
+        pass
+    return None, blob  # No filename found
 
 def main():
     parser = argparse.ArgumentParser(description="Decode ESPHome embedded config.b64")
@@ -11,13 +24,14 @@ def main():
     parser.add_argument("--key", help="Decryption key (required for some encryption types)")
     parser.add_argument("--encryption", choices=["none", "xor"], default="none",
                         help="Encryption type used when embedding (default: none)")
-    parser.add_argument("-o", "--output", help="Write output to file instead of stdout")
+    parser.add_argument("-o", "--output", nargs="?", const=True,
+                        help="Write output to file. If no filename is given, use embedded filename.")
+
     args = parser.parse_args()
 
     # Validate encryption/key combo
     if args.encryption == "none" and args.key:
         print("[!] Error: --key was specified but --encryption is 'none'")
-        print("    If the config was not encrypted, remove the --key argument.")
         sys.exit(1)
 
     if args.encryption == "xor" and not args.key:
@@ -44,21 +58,35 @@ def main():
         print(f"[!] Failed to decode base64: {e}")
         sys.exit(1)
 
-    # Handle decryption
     if args.encryption == "xor":
         print("[*] Decrypting using XOR...")
         blob = xor_decrypt(blob, args.key.encode("utf-8"))
     else:
         print("[*] No encryption specified — using plain base64")
 
-    # Output result
-    if args.output:
-        with open(args.output, "wb") as out:
-            out.write(blob)
-        print(f"[+] Written decoded config to {args.output}")
+    embedded_filename, content = extract_filename(blob)
+
+    if embedded_filename:
+        print(f"[*] Embedded filename: {embedded_filename}")
     else:
+        print("[*] No embedded filename found")
+
+    # Handle output
+    if args.output is None:
         print("[+] Decoded config:\n")
-        print(blob.decode("utf-8", errors="replace"))
+        print(content.decode("utf-8", errors="replace"))
+    else:
+        if args.output is True:  # User passed just -o with no filename
+            if not embedded_filename:
+                print("[!] No embedded filename found — cannot infer output filename")
+                sys.exit(1)
+            output_path = embedded_filename
+        else:
+            output_path = args.output
+
+        with open(output_path, "wb") as out:
+            out.write(content)
+        print(f"[+] Written decoded config to {output_path}")
 
 if __name__ == "__main__":
     main()
