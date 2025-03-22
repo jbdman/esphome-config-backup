@@ -1,5 +1,6 @@
 example-local.yaml
 .esphome/
-components/config_backup/__pycache__/
+esphome/components/config_backup/__pycache__/
+esphome/components/config_backup/build.py
 *.log
 *.zip
