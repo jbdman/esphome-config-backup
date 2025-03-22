@@ -1,6 +1,6 @@
 #pragma once
 #include "esphome/core/component.h"
-#include "esphome/web_server/web_server.h"
+#include "esphome/components/web_server/web_server.h"
 #include "config_embed.h"
 
 namespace esphome {
