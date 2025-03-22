@@ -17,6 +17,7 @@ ConfigBackup = CONFIG_BACKUP_NS.class_(
 
 CONF_KEY = "key"
 CONF_ENCRYPTION = "encryption"
+CONF_DEBUG = "debug"
 
 ENCRYPTION_TYPES = ["none", "xor"]
 
@@ -26,6 +27,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(CONF_WEB_SERVER_BASE_ID): cv.use_id(web_server_base.WebServerBase),
         cv.Optional(CONF_ENCRYPTION, default="none"): cv.one_of(*ENCRYPTION_TYPES, lower=True),
         cv.Optional(CONF_KEY): cv.string,
+        cv.Optional(CONF_DEBUG): cv.string,
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -40,6 +42,7 @@ def xor_encrypt(data: bytes, key: bytes) -> bytes:
 async def to_code(config):
     encryption = config[CONF_ENCRYPTION]
     key = config.get(CONF_KEY)
+    debug = config.get(CONF_DEBUG)
 
     input_file = CORE.config_path
     output_file = os.path.join(os.path.dirname(__file__), "config_embed.h")
@@ -47,18 +50,24 @@ async def to_code(config):
     with open(input_file, "rb") as f:
         yaml_bytes = f.read()
 
+    filename = os.path.basename(input_file)
+    yaml_with_comment = f"# filename: {filename}\n".encode("utf-8") + yaml_bytes
+
     if encryption == "xor":
         if not key:
             raise cv.Invalid("Encryption type 'xor' requires a 'key' to be specified.")
         print("[config_backup] Encrypting config using XOR")
-        final_bytes = xor_encrypt(yaml_bytes, key.encode("utf-8"))
+        final_bytes = xor_encrypt(yaml_with_comment, key.encode("utf-8"))
     elif encryption == "none":
         print("[config_backup] Embedding config without encryption")
-        final_bytes = yaml_bytes
+        final_bytes = yaml_with_comment
     else:
         raise cv.Invalid(f"Unsupported encryption type: {encryption}")
 
     b64_encoded = base64.b64encode(final_bytes).decode("utf-8")
+
+    if debug == "print.b64" || debug == "print.*" || debug == "*":
+        print(b64_encoded)
 
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
