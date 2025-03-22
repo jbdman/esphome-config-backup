@@ -10,13 +10,18 @@ from Crypto.Protocol.KDF import PBKDF2
 def xor_decrypt(data: bytes, key: bytes) -> bytes:
     return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
 
-def aes256_decrypt(data: bytes, key: bytes) -> bytes:
-    if len(data) < 16:
-        raise ValueError("Invalid AES blob (missing IV)")
-    iv = data[:16]
-    ciphertext = data[16:]
+def aes256_decrypt(data: bytes, password: str) -> bytes:
+    if len(data) < 32:
+        raise ValueError("Invalid AES blob (must include salt and IV)")
+
+    salt = data[:16]
+    iv = data[16:32]
+    ciphertext = data[32:]
+
+    key = PBKDF2(password, salt=salt, dkLen=32, count=100000)
     cipher = AES.new(key, AES.MODE_CBC, iv)
     return unpad(cipher.decrypt(ciphertext), AES.block_size)
+
 
 def derive_key(password: str, salt: str) -> bytes:
     print(f"[*] Deriving AES key from password and salt...")
@@ -37,7 +42,6 @@ def main():
     parser = argparse.ArgumentParser(description="Decode ESPHome embedded config.b64")
     parser.add_argument("input", help="Input file or URL (e.g. config.b64 or http://<device_ip>/config.b64)")
     parser.add_argument("--key", help="Decryption key (required for some encryption types)")
-    parser.add_argument("--salt", help="Salt (required for AES-256)")
     parser.add_argument("--encryption", choices=["none", "xor", "aes256"], default="none",
                         help="Encryption type used when embedding (default: none)")
     parser.add_argument("-o", "--output", nargs="?", const=True,
@@ -57,9 +61,6 @@ def main():
     if args.encryption == "aes256":
         if not args.key:
             print("[!] Error: --encryption aes256 requires a --key")
-            sys.exit(1)
-        if not args.salt:
-            print("[!] Error: --encryption aes256 requires a --salt")
             sys.exit(1)
 
     # Load file or URL
@@ -86,10 +87,9 @@ def main():
         print("[*] Decrypting using XOR...")
         blob = xor_decrypt(blob, args.key.encode("utf-8"))
     elif args.encryption == "aes256":
-        print("[*] Decrypting using AES-256 (PBKDF2)...")
+        print("[*] Decrypting using AES-256 (salt and IV extracted from blob)...")
         try:
-            derived_key = derive_key(args.key, args.salt)
-            blob = aes256_decrypt(blob, derived_key)
+            blob = aes256_decrypt(blob, args.key)
         except Exception as e:
             print(f"[!] AES decryption failed: {e}")
             sys.exit(1)
