@@ -7,6 +7,7 @@ from esphome.core import CORE, coroutine_with_priority
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding as aes_padding
 from cryptography.hazmat.backends import default_backend
+from Crypto.Protocol.KDF import PBKDF2
 import secrets
 
 
@@ -21,6 +22,7 @@ ConfigBackup = CONFIG_BACKUP_NS.class_(
 )
 
 CONF_KEY = "key"
+CONF_SALT = "salt"
 CONF_ENCRYPTION = "encryption"
 CONF_DEBUG = "debug"
 
@@ -32,6 +34,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(CONF_WEB_SERVER_BASE_ID): cv.use_id(web_server_base.WebServerBase),
         cv.Optional(CONF_ENCRYPTION, default="none"): cv.one_of(*ENCRYPTION_TYPES, lower=True),
         cv.Optional(CONF_KEY): cv.string,
+        cv.Optional(CONF_SALT): cv.string,
         cv.Optional(CONF_DEBUG): cv.string,
     }
 ).extend(cv.COMPONENT_SCHEMA)
@@ -54,11 +57,15 @@ def aes256_encrypt(data: bytes, key: bytes) -> bytes:
     encrypted = encryptor.update(padded) + encryptor.finalize()
     return iv + encrypted  # prepend IV for decoder
 
+def deriveKey(password, salt: bytes):
+    return PBKDF2(password, salt=salt, dkLen=32, count=100000)
+
 
 @coroutine_with_priority(64.0)
 async def to_code(config):
     encryption = config[CONF_ENCRYPTION]
     key = config.get(CONF_KEY)
+    salt = config.get(CONF_SALT)
     debug = config.get(CONF_DEBUG)
 
     input_file = CORE.config_path
@@ -78,8 +85,10 @@ async def to_code(config):
     elif encryption == "aes256":
         if not key:
             raise cv.Invalid("Encryption type 'aes256' requires a 'key' to be specified.")
+        if not salt:
+            raise cv.Invalid("Encryption type 'aes256' requires a 'salt' to be specified.")
         print("[config_backup] Encrypting config using AES-256")
-        final_bytes = aes256_encrypt(yaml_with_comment, key.encode("utf-8"))
+        final_bytes = aes256_encrypt(yaml_with_comment, deriveKey(key, salt))
     elif encryption == "none":
         print("[config_backup] Embedding config without encryption")
         final_bytes = yaml_with_comment
