@@ -1,2 +1,3 @@
 example-local.yaml
 .esphome/
+components/config_backup/__pycache__/

@@ -1,11 +1,19 @@
-from esphome.components import custom_component
-from esphome import automation, config_validation as cv
 import esphome.codegen as cg
+import esphome.config_validation as cv
 
-CONFIG_SCHEMA = cv.Schema({}).extend({})
+# C++ namespace: config_backup::ConfigBackup
+CONFIG_BACKUP_NS = cg.global_ns.namespace("config_backup")
+ConfigBackup = CONFIG_BACKUP_NS.class_("ConfigBackup", cg.Component)
 
-CODEOWNERS = ["@yourgithubusername"]
+# Optional ID for referencing this component later
+CONFIG_SCHEMA = cv.Schema({
+    cv.GenerateID(): cv.declare_id(ConfigBackup),
+})
+
+CODEOWNERS = ["@jbdman"]
+REQUIRES = ["web_server"]
+
 
 def to_code(config):
-    cg.add_define("USE_CONFIG_BACKUP")
-    yield cg.register_component(cg.new_Pvariable("config_backup"), config)
+    var = cg.new_Pvariable(config[cv.CONF_ID], ConfigBackup)
+    yield cg.register_component(var, config)
