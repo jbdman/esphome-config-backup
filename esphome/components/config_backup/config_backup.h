@@ -1,10 +1,8 @@
 #pragma once
 
 #include "esphome/core/component.h"
-#include "esphome/core/application.h"
 #include "esphome/components/web_server_base/web_server_base.h"
 #include "config_embed.h"
-
 
 namespace esphome {
 namespace config_backup {
@@ -25,12 +23,9 @@ class ConfigDumpHandler : public AsyncWebHandler {
 class ConfigBackup : public Component {
  public:
   void setup() override {
-    for (auto *comp : esphome::App.get_components()) {
-      auto *wsb = dynamic_cast<esphome::web_server_base::WebServerBase *>(comp);
-      if (wsb != nullptr) {
-        wsb->add_handler(new ConfigDumpHandler());
-        break;
-      }
+    auto *server = web_server_base::get_web_server_base();
+    if (server != nullptr) {
+      server->add_handler(new ConfigDumpHandler());
     }
   }
 };
