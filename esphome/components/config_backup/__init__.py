@@ -26,7 +26,7 @@ def to_code(config):
         raise Exception("CONFIG_BACKUP_KEY not set in environment")
 
     input_file = CORE.config_path
-    output_file = os.path.join(os.path.dirname(__file__), "src", "config_embed.h")
+    output_file = os.path.join(os.path.dirname(__file__), "config_embed.h")
 
     with open(input_file, "rb") as f:
         yaml_bytes = f.read()
