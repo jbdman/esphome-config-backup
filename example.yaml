@@ -21,4 +21,5 @@ web_server:
 config_backup:
   encryption: aes256
   key: 1234567812345678
+  salt: espsalt
   debug: print.b64
