@@ -1,18 +1,34 @@
 #pragma once
+
 #include "esphome/core/component.h"
-#include "esphome/components/web_server/web_server.h"
+#include "esphome/components/web_server_base/web_server_base.h"
 #include "config_embed.h"
 
 namespace esphome {
 namespace config_backup {
 
+class ConfigDumpHandler : public AsyncWebHandler {
+ public:
+  bool canHandle(AsyncWebServerRequest *request) override {
+    return request->url() == "/config.b64" && request->method() == HTTP_GET;
+  }
+
+  void handleRequest(AsyncWebServerRequest *request) override {
+    request->send(200, "text/plain", CONFIG_B64);
+  }
+
+  bool isRequestHandlerTrivial() override { return true; }
+};
+
 class ConfigBackup : public Component {
  public:
   void setup() override {
-    if (web_server::global_web_server != nullptr) {
-      web_server::global_web_server->add_handler("/config.b64", [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", CONFIG_B64);
-      });
+    for (auto *comp : App.get_components()) {
+      auto *wsb = dynamic_cast<web_server_base::WebServerBase *>(comp);
+      if (wsb != nullptr) {
+        wsb->add_handler(new ConfigDumpHandler());
+        break;
+      }
     }
   }
 };
