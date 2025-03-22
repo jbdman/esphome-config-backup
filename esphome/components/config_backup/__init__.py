@@ -1,23 +1,23 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
+from esphome.components import web_server_base
+from esphome.const import CONF_ID
 import os
 import base64
 from esphome.core import CORE
 
-CONFIG_BACKUP_NS = cg.global_ns.namespace("config_backup")
-ConfigBackup = CONFIG_BACKUP_NS.class_("ConfigBackup", cg.Component)
+CONFIG_BACKUP_NS = cg.esphome_ns.namespace("config_backup")
+ConfigBackup = CONFIG_BACKUP_NS.class_("ConfigBackup", cg.Component, cg.global_ns.class_("AsyncWebHandler"))
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(ConfigBackup),
-})
+}).extend(web_server_base.WEB_SERVER_BASE_SCHEMA)
 
 CODEOWNERS = ["@jbdman"]
-REQUIRES = ["web_server"]
-
+REQUIRES = ["web_server_base"]
 
 def xor_encrypt(data: bytes, key: bytes) -> bytes:
     return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
-
 
 def to_code(config):
     # Handle encryption + header generation inline
@@ -34,17 +34,18 @@ def to_code(config):
     encrypted = xor_encrypt(yaml_bytes, key.encode("utf-8"))
     b64_encoded = base64.b64encode(encrypted).decode("utf-8")
 
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         f.write('#pragma once\n\n')
-        f.write('const char CONFIG_B64[] = \n')
+        f.write('const char CONFIG_B64[] =\n')
         for i in range(0, len(b64_encoded), 80):
             f.write(f'"{b64_encoded[i:i+80]}"\n')
         f.write(';\n')
 
-
     print(f"[config_backup] Embedded encrypted config from {input_file} → {output_file}")
 
-    # Register the component
-    var = cg.new_Pvariable(config[cv.CONF_ID])
+    # Get web server base reference
+    server = yield cg.get_variable(config[web_server_base.CONF_WEB_SERVER_BASE_ID])
+
+    # Instantiate the component
+    var = cg.new_Pvariable(config[CONF_ID], server)
     yield cg.register_component(var, config)
