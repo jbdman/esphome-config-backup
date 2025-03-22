@@ -1,14 +1,16 @@
 #pragma once
-#include "esphome.h"
-#include "config_embed.h"  // Your generated blob
+#include "esphome/core/component.h"
+#include "esphome/web_server/web_server.h"
+#include "config_embed.h"
 
+namespace esphome {
 namespace config_backup {
 
-class ConfigBackup : public esphome::Component {
+class ConfigBackup : public Component {
  public:
   void setup() override {
-    if (esphome::web_server::global_web_server != nullptr) {
-      esphome::web_server::global_web_server->add_handler("/config.b64", [](AsyncWebServerRequest *request) {
+    if (web_server::global_web_server != nullptr) {
+      web_server::global_web_server->add_handler("/config.b64", [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", CONFIG_B64);
       });
     }
@@ -16,3 +18,4 @@ class ConfigBackup : public esphome::Component {
 };
 
 }  // namespace config_backup
+}  // namespace esphome
