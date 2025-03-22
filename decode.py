@@ -4,6 +4,7 @@ import sys
 import os
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
+from Crypto.Protocol.KDF import PBKDF2
 
 
 def xor_decrypt(data: bytes, key: bytes) -> bytes:
@@ -17,9 +18,11 @@ def aes256_decrypt(data: bytes, key: bytes) -> bytes:
     cipher = AES.new(key, AES.MODE_CBC, iv)
     return unpad(cipher.decrypt(ciphertext), AES.block_size)
 
+def derive_key(password: str, salt: str) -> bytes:
+    print(f"[*] Deriving AES key from password and salt...")
+    return PBKDF2(password, salt=salt.encode("utf-8"), dkLen=32, count=100000)
 
 def extract_filename(blob: bytes) -> (str, bytes):
-    # Looks for a line like: "# filename: myfile.yaml"
     try:
         first_line_end = blob.index(b"\n")
         first_line = blob[:first_line_end].decode("utf-8").strip()
@@ -34,6 +37,7 @@ def main():
     parser = argparse.ArgumentParser(description="Decode ESPHome embedded config.b64")
     parser.add_argument("input", help="Input file or URL (e.g. config.b64 or http://<device_ip>/config.b64)")
     parser.add_argument("--key", help="Decryption key (required for some encryption types)")
+    parser.add_argument("--salt", help="Salt (required for AES-256)")
     parser.add_argument("--encryption", choices=["none", "xor", "aes256"], default="none",
                         help="Encryption type used when embedding (default: none)")
     parser.add_argument("-o", "--output", nargs="?", const=True,
@@ -41,7 +45,7 @@ def main():
 
     args = parser.parse_args()
 
-    # Validate encryption/key combo
+    # Validate encryption/key/salt combos
     if args.encryption == "none" and args.key:
         print("[!] Error: --key was specified but --encryption is 'none'")
         sys.exit(1)
@@ -49,6 +53,14 @@ def main():
     if args.encryption == "xor" and not args.key:
         print("[!] Error: --encryption xor requires a --key")
         sys.exit(1)
+
+    if args.encryption == "aes256":
+        if not args.key:
+            print("[!] Error: --encryption aes256 requires a --key")
+            sys.exit(1)
+        if not args.salt:
+            print("[!] Error: --encryption aes256 requires a --salt")
+            sys.exit(1)
 
     # Load file or URL
     if args.input.startswith("http://") or args.input.startswith("https://"):
@@ -74,9 +86,10 @@ def main():
         print("[*] Decrypting using XOR...")
         blob = xor_decrypt(blob, args.key.encode("utf-8"))
     elif args.encryption == "aes256":
-        print("[*] Decrypting using AES-256...")
+        print("[*] Decrypting using AES-256 (PBKDF2)...")
         try:
-            blob = aes256_decrypt(blob, args.key.encode("utf-8"))
+            derived_key = derive_key(args.key, args.salt)
+            blob = aes256_decrypt(blob, derived_key)
         except Exception as e:
             print(f"[!] AES decryption failed: {e}")
             sys.exit(1)
