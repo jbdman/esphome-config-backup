@@ -7,8 +7,17 @@
 namespace esphome {
 namespace config_backup {
 
-class ConfigDumpHandler : public AsyncWebHandler {
+class ConfigBackup : public esphome::Component, public AsyncWebHandler {
  public:
+  explicit ConfigBackup(web_server_base::WebServerBase *base) : base_(base) {
+    if (this->base_ != nullptr) {
+      this->base_->add_handler(this);  // Add ourselves to the web server
+    }
+  }
+
+  void setup() override {}
+  void dump_config() override {}
+
   bool canHandle(AsyncWebServerRequest *request) override {
     return request->url() == "/config.b64" && request->method() == HTTP_GET;
   }
@@ -18,16 +27,9 @@ class ConfigDumpHandler : public AsyncWebHandler {
   }
 
   bool isRequestHandlerTrivial() override { return true; }
-};
 
-class ConfigBackup : public Component {
- public:
-  void setup() override {
-    auto *server = web_server_base::get_web_server_base();
-    if (server != nullptr) {
-      server->add_handler(new ConfigDumpHandler());
-    }
-  }
+ protected:
+  web_server_base::WebServerBase *base_;
 };
 
 }  // namespace config_backup
