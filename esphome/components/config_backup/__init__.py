@@ -66,7 +66,7 @@ async def to_code(config):
 
     b64_encoded = base64.b64encode(final_bytes).decode("utf-8")
 
-    if debug == "print.b64" || debug == "print.*" || debug == "*":
+    if debug == "print.b64" or debug == "print.*" or debug == "*":
         print(b64_encoded)
 
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
