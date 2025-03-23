@@ -6,6 +6,8 @@
 #include "config_embed.h"
 #ifdef ESPHOME_CONFIG_BACKUP_GUI
   #include "config-decrypt.h"
+  extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
+  extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
 #endif
 
 namespace esphome {
@@ -14,9 +16,6 @@ namespace config_backup {
 using namespace web_server_base;
 
 #ifdef ESPHOME_CONFIG_BACKUP_GUI
-
-extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
-extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
 
 class InjectMiddlewareHandler : public AsyncWebHandler {
  public:
