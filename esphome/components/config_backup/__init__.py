@@ -51,6 +51,7 @@ CONF_ENCRYPTION = "encryption"
 CONF_DEBUG = "debug"
 CONF_GUI="gui"
 CONF_COMPRESS="compress"
+CONF_CONFIG_PATH="config_path"
 
 ENCRYPTION_TYPES = ["none", "xor", "aes256"]
 
@@ -63,6 +64,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_COMPRESS, default=True): cv.boolean,
         cv.Optional(CONF_KEY): cv.string,
         cv.Optional(CONF_DEBUG): cv.string,
+        cv.Optional(CONF_CONFIG_PATH, default="/config.b64"): cv.string
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -100,13 +102,16 @@ async def to_code(config):
     debug = config.get(CONF_DEBUG)
     gui = config.get(CONF_GUI)
     compress = config.get(CONF_COMPRESS)
+    config_path = config.get(CONF_CONFIG_PATH)
+
+    cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
 
     jsPath = os.path.join(os.path.dirname(__file__), "config-decrypt.h")
     if os.path.exists(jsPath): os.remove(jsPath)
     if gui: 
         input_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
         with open(input_file, "r", encoding="utf-8") as f:
-            js_content = jsmin(f.read().replace("{{test}}","Hello, World!"))
+            js_content = jsmin(f.read().replace("{{path}}",config_path))
         js_bytes = js_content.encode("utf-8")
         gzip_compressed = gzip.compress(js_bytes)
         bytes_as_int = ", ".join(str(x) for x in gzip_compressed)
