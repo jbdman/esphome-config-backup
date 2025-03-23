@@ -1,4 +1,4 @@
-function waitForElement(selector, root = document) {
+function waitForElement(selector, root=(document)) {
     return new Promise((resolve) => {
         const found = root.querySelector(selector);
         if (found)
