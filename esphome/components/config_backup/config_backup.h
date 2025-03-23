@@ -80,6 +80,9 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
       AsyncWebServerResponse *response = request->beginResponse_P(200, "text/plain", CONFIG_B64, CONFIG_B64_SIZE);
       response->addHeader("Content-Encoding", "gzip");
       response->addHeader("X-Encryption-Type", this->encryption);
+      #ifdef ESPHOME_CONFIG_BACKUP_COMPRESS
+        response->addHeader("X-Compression-Type", "gzip")
+      #endif
       request->send(response);
     }
     #ifdef ESPHOME_CONFIG_BACKUP_GUI 
