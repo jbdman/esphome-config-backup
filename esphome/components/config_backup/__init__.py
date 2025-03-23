@@ -50,6 +50,7 @@ CONF_KEY = "key"
 CONF_ENCRYPTION = "encryption"
 CONF_DEBUG = "debug"
 CONF_GUI="gui"
+CONF_COMPRESS="compress"
 
 ENCRYPTION_TYPES = ["none", "xor", "aes256"]
 
@@ -59,6 +60,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(CONF_WEB_SERVER_BASE_ID): cv.use_id(web_server_base.WebServerBase),
         cv.Optional(CONF_ENCRYPTION, default="none"): cv.one_of(*ENCRYPTION_TYPES, lower=True),
         cv.Optional(CONF_GUI, default=True): cv.boolean,
+        cv.Optional(CONF_COMPRESS, default=True): cv.boolean,
         cv.Optional(CONF_KEY): cv.string,
         cv.Optional(CONF_DEBUG): cv.string,
     }
@@ -97,6 +99,7 @@ async def to_code(config):
     key = config.get(CONF_KEY)
     debug = config.get(CONF_DEBUG)
     gui = config.get(CONF_GUI)
+    compress = config.get(CONF_COMPRESS)
 
     jsPath = os.path.join(os.path.dirname(__file__), "config-decrypt.h")
     if os.path.exists(jsPath): os.remove(jsPath)
@@ -123,8 +126,7 @@ async def to_code(config):
     filename = os.path.basename(input_file)
     yaml_with_comment = f"# filename: {filename}\n".encode("utf-8") + yaml_bytes
 
-    gzip_yaml_with_comment = gzip.compress(yaml_with_comment)
-    print(base64.b64encode(gzip_yaml_with_comment).decode("utf-8"))
+    if compress: yaml_with_comment = gzip.compress(yaml_with_comment)
 
     if encryption == "xor":
         if not key:
