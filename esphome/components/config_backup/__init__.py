@@ -123,7 +123,8 @@ async def to_code(config):
     filename = os.path.basename(input_file)
     yaml_with_comment = f"# filename: {filename}\n".encode("utf-8") + yaml_bytes
 
-    # gzip_yaml_with_comment = gzip.compress(yaml_with_comment)
+    gzip_yaml_with_comment = gzip.compress(yaml_with_comment)
+    print(base64.b64encode(gzip_yaml_with_comment).decode("utf-8"))
 
     if encryption == "xor":
         if not key:
