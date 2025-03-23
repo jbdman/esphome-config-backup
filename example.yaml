@@ -19,6 +19,7 @@ web_server:
   port: 80
 
 config_backup:
-  encryption: aes256
-  key: mysecretkey
-  debug: print.b64
+  encryption: aes256 #none,xor,aes256 (default: none)
+  key: mysecretkey #Secret for encryption/encoding
+  # debug: print.b64 #Print messages for debugging
+  # gui: True #Display the gui widget for decrypting on the web interface (default: True)
