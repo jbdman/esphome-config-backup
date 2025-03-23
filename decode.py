@@ -2,6 +2,7 @@ import argparse
 import base64
 import sys
 import os
+import gzip
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from Crypto.Protocol.KDF import PBKDF2
@@ -44,6 +45,8 @@ def main():
     parser.add_argument("--key", help="Decryption key (required for some encryption types)")
     parser.add_argument("--encryption", choices=["none", "xor", "aes256"], default="none",
                         help="Encryption type used when embedding (default: none)")
+    parser.add_argument("--compression", choices=["none","gzip"], default="none",
+                        help="Compression type used when embedding (default: none)"),
     parser.add_argument("-o", "--output", nargs="?", const=True,
                         help="Write output to file. If no filename is given, use embedded filename.")
 
@@ -73,9 +76,13 @@ def main():
             sys.exit(1)
         b64 = resp.text.strip()
         encryption = resp.headers['X-Encryption-Type']
+        compress = resp.headers['X-Compression-Type']
         if args.encryption == "none" and encryption != "none":
             print(f"[*] Read encryption type from X-Encryption-Type header: {encryption}")
             args.encryption = encryption
+        if args.compression == "none" and compress != "none":
+            print(f"[*] Read compression type from X-Compression-Type header: {compress}")
+            args.compression = compress
     else:
         with open(args.input, "r", encoding="utf-8") as f:
             b64 = f.read().strip()
@@ -99,6 +106,10 @@ def main():
             sys.exit(1)
     else:
         print("[*] No encryption specified — using plain base64")
+
+    if args.compression == "gzip":
+        print("[*] Decompressing gzip blob...")
+        blob = gzip.decompress(blob)
 
     embedded_filename, content = extract_filename(blob)
 
