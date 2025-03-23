@@ -20,22 +20,20 @@ class InjectMiddlewareHandler : public AsyncWebHandler {
   }
 
   void handleRequest(AsyncWebServerRequest *request) override {
-    // Proxy the request to the next handler
-    AsyncWebServerResponse *original_response = request->beginResponse_P(200, "text/html", ESPHOME_WEBSERVER_INDEX_HTML, ESPHOME_WEBSERVER_INDEX_HTML_SIZE);
-    
-    original_response->setContentProcessor([](const String &input) -> String {
-      String modified = input;
-      int insert_pos = modified.indexOf("</head>");
-      if (insert_pos >= 0) {
-        modified = modified.substring(0, insert_pos) +
-                   "<script src=\"/config-decrypt.js\"></script>\n" +
-                   modified.substring(insert_pos);
-      }
-      return modified;
-    });
-
-    request->send(original_response);
+    // Copy the PROGMEM HTML content into RAM
+    std::string html((const char*)ESPHOME_WEBSERVER_INDEX_HTML, ESPHOME_WEBSERVER_INDEX_HTML_SIZE);
+  
+    // Find the insert point and inject script tag
+    std::string script_tag = "<script src=\"/config-decrypt.js\"></script>\n";
+    size_t insert_pos = html.find("</head>");
+    if (insert_pos != std::string::npos) {
+      html.insert(insert_pos, script_tag);
+    }
+  
+    // Send the modified HTML as normal response
+    request->send(200, "text/html", html.c_str());
   }
+
 
   bool isRequestHandlerTrivial() override { return false; }
 };
