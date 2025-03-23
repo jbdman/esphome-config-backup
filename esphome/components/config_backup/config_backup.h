@@ -76,6 +76,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   void handleRequest(AsyncWebServerRequest *request) override {
     if (request->url() == "/config.b64") {
       AsyncWebServerResponse *response = request->beginResponse_P(200, "text/plain", CONFIG_B64, CONFIG_B64_SIZE);
+      response->addHeader("Content-Encoding", "gzip");
       response->addHeader("X-Encryption-Type", this->encryption);
       request->send(response);
     }
