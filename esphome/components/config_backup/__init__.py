@@ -1,3 +1,27 @@
+import subprocess
+import sys
+
+def ensure_package(package_name, import_name=None):
+    import_name = import_name or package_name
+    try:
+        __import__(import_name)
+    except ImportError:
+        response = input(
+            f"The required package '{package_name}' is not installed.\n"
+            f"Would you like to install it now? [y/N]: "
+        ).strip().lower()
+        if response == 'y':
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+        else:
+            print(f"Please install '{package_name}' manually and re-run.")
+            sys.exit(1)
+
+# Check and install packages as needed
+ensure_package('cryptography')
+ensure_package('pycryptodome', 'Crypto')
+ensure_package('jsmin')
+
+
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import web_server_base
@@ -9,8 +33,6 @@ from cryptography.hazmat.primitives import padding as aes_padding
 from cryptography.hazmat.backends import default_backend
 from Crypto.Protocol.KDF import PBKDF2
 import secrets
-
-
 import os
 import base64
 
