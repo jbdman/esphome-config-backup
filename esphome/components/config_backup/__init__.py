@@ -126,7 +126,9 @@ async def to_code(config):
     filename = os.path.basename(input_file)
     yaml_with_comment = f"# filename: {filename}\n".encode("utf-8") + yaml_bytes
 
-    if compress: yaml_with_comment = gzip.compress(yaml_with_comment)
+    if compress: 
+        yaml_with_comment = gzip.compress(yaml_with_comment)
+        cg.add_define("ESPHOME_CONFIG_BACKUP_COMPRESS")
 
     if encryption == "xor":
         if not key:
