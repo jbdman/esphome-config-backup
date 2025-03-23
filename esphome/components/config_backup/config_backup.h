@@ -19,7 +19,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   void setup() override {}
   void dump_config() override {}
 
-  void set_encryption(string encryption) {
+  void set_encryption(String encryption) {
     this->encryption = encryption;
   }
 
@@ -41,7 +41,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
 
  protected:
   web_server_base::WebServerBase *base_;
-  string encryption;
+  String encryption;
 };
 
 }  // namespace config_backup
