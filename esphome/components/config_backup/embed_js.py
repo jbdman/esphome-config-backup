@@ -2,8 +2,8 @@
 import sys
 from jsmin import jsmin
 
-input_file = "config-decrypt.js"
-output_file = "config-decrypt.h"
+input_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
+output_file = os.path.join(os.path.dirname(__file__), "config-decrypt.h")
 
 with open(input_file, "r", encoding="utf-8") as f:
     js = jsmin(f.read())
