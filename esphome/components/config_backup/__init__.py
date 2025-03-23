@@ -136,7 +136,9 @@ async def to_code(config):
     if debug == "print.b64" or debug == "print.*" or debug == "*":
         print(b64_encoded)
 
-    config_uint8_t = f"const uint8_t CONFIG_B64[{len(gzip_compressed)}] PROGMEM = {{{", ".join(str(x) for x in gzip_compressed)}}}"
+    bytes_as_int = ", ".join(str(x) for x in gzip_compressed)
+
+    config_uint8_t = f"const uint8_t CONFIG_B64[{len(gzip_compressed)}] PROGMEM = {{{bytes_as_int}}}"
     config_size_t = f"const size_t CONFIG_B64_SIZE = {len(gzip_compressed)}"
     
     cg.add_global(cg.RawExpression(config_uint8_t))
