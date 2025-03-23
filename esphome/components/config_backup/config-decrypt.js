@@ -128,7 +128,7 @@ async function injectConfigBackupWidget() {
     const sections = main.querySelectorAll("section.col");
     const leftCol = sections[0];
 
-    await waitForElement("input.btn", leftCol)
+    await waitForElement('form[action="/update"]', leftCol);
 
     const wrapper = document.createElement("div");
     wrapper.innerHTML = `
