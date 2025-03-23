@@ -19,7 +19,7 @@ def ensure_package(package_name, import_name=None):
 # Check and install packages as needed
 ensure_package('cryptography')
 ensure_package('pycryptodome', 'Crypto')
-ensure_package('jsmin')
+ensure_package('gzip')
 
 
 import esphome.codegen as cg
@@ -36,7 +36,6 @@ import secrets
 import os
 import base64
 import gzip
-from jsmin import jsmin
 
 CONFIG_BACKUP_NS = cg.esphome_ns.namespace("config_backup")
 ConfigBackup = CONFIG_BACKUP_NS.class_(
@@ -102,7 +101,7 @@ async def to_code(config):
     if gui: 
         input_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
         with open(input_file, "rb") as f:
-            js_content = jsmin(f.read())
+            js_content = f.read()
         gzip_compressed = gzip.compress(js_content)
         bytes_as_int = ", ".join(str(x) for x in gzip_compressed)
 
