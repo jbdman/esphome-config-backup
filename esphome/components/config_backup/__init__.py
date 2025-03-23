@@ -106,7 +106,7 @@ async def to_code(config):
     if gui: 
         input_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
         with open(input_file, "r", encoding="utf-8") as f:
-            js_content = jsmin(f.read())
+            js_content = jsmin(f.read().replace("{{test}}","Hello, World!"))
         js_bytes = js_content.encode("utf-8")
         gzip_compressed = gzip.compress(js_bytes)
         bytes_as_int = ", ".join(str(x) for x in gzip_compressed)
