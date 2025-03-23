@@ -5,6 +5,9 @@
 #include "config_embed.h"
 #include "config-decrypt.h"
 
+extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
+extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
+
 namespace esphome {
 namespace config_backup {
 
