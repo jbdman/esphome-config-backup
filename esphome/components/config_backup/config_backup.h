@@ -18,7 +18,7 @@ class InjectMiddlewareHandler : public AsyncWebHandler {
 
   void handleRequest(AsyncWebServerRequest *request) override {
     // Proxy the request to the next handler
-    AsyncWebServerResponse *original_response = request->beginResponse(200, "text/html", INDEX_HTML);
+    AsyncWebServerResponse *original_response = request->beginResponse_P(200, "text/html", ESPHOME_WEBSERVER_INDEX_HTML, ESPHOME_WEBSERVER_INDEX_HTML_SIZE);
     
     original_response->setContentProcessor([](const String &input) -> String {
       String modified = input;
