@@ -24,3 +24,4 @@ config_backup:
   # debug: print.b64 #Print messages for debugging accepts: print.b64,print.*,*
   # gui: True #Display the gui widget for decrypting on the web interface (default: True)
   # compress: True #Compress the config (prior to encrypting/encoding) (default: True)
+  # config_path: /config.b64 #HTTP Path for the config blob (default: /config.b64)
