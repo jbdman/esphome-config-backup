@@ -68,7 +68,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   }
 
   bool canHandle(AsyncWebServerRequest *request) override {
-    return (request->url() == "/config.b64" 
+    return (request->url() == ESPHOME_CONFIG_BACKUP_CONFIG_PATH 
           #ifdef ESPHOME_CONFIG_BACKUP_GUI
             || request->url() == "/config-decrypt.js"
           #endif
@@ -76,7 +76,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   }
 
   void handleRequest(AsyncWebServerRequest *request) override {
-    if (request->url() == "/config.b64") {
+    if (request->url() == ESPHOME_CONFIG_BACKUP_CONFIG_PATH) {
       AsyncWebServerResponse *response = request->beginResponse_P(200, "text/plain", CONFIG_B64, CONFIG_B64_SIZE);
       response->addHeader("Content-Encoding", "gzip");
       response->addHeader("X-Encryption-Type", this->encryption);
