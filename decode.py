@@ -75,8 +75,8 @@ def main():
             print(f"[!] Failed to fetch: {resp.status_code}")
             sys.exit(1)
         b64 = resp.text.strip()
-        encryption = resp.headers['X-Encryption-Type']
-        compress = resp.headers['X-Compression-Type']
+        encryption = resp.headers['X-Encryption-Type'] if 'X-Encryption-Type' in resp.headers else "none"
+        compress = resp.headers['X-Compression-Type'] if 'X-Compression-Type' in resp.headers else "none"
         if args.encryption == "none" and encryption != "none":
             print(f"[*] Read encryption type from X-Encryption-Type header: {encryption}")
             args.encryption = encryption
