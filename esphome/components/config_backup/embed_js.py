@@ -1,11 +1,12 @@
 # embed_js.py
 import sys
+from jsmin import jsmin
 
 input_file = "config-decrypt.js"
 output_file = "config-decrypt.h"
 
 with open(input_file, "r", encoding="utf-8") as f:
-    js = f.read()
+    js = jsmin(f.read())
 
 with open(output_file, "w", encoding="utf-8") as f:
     f.write("#pragma once\n\n")
