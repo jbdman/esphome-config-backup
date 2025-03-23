@@ -99,11 +99,20 @@ async def to_code(config):
     jsPath = os.path.join(os.path.dirname(__file__), "config-decrypt.h")
     if os.path.exists(jsPath): os.remove(jsPath)
     if gui: 
-        exec(open(os.path.join(os.path.dirname(__file__), "embed_js.py")).read())
+        input_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
+        with open(input_file, "rb") as f:
+            js_content = f.read()
+        gzip_compressed = gzip.compress(js_content)
+        bytes_as_int = ", ".join(str(x) for x in gzip_compressed)
+
+        config_uint8_t = f"const uint8_t CONFIG_DECRYPT_JS[{len(gzip_compressed)}] PROGMEM = {{{bytes_as_int}}}"
+        config_size_t = f"const size_t CONFIG_DECRYPT_JS_SIZE = {len(gzip_compressed)}"
+        
+        cg.add_global(cg.RawExpression(config_uint8_t))
+        cg.add_global(cg.RawExpression(config_size_t))
         cg.add_define("ESPHOME_CONFIG_BACKUP_GUI")
 
     input_file = CORE.config_path
-    output_file = os.path.join(os.path.dirname(__file__), "config_embed.h")
 
     with open(input_file, "rb") as f:
         yaml_bytes = f.read()
