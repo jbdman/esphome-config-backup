@@ -3,7 +3,9 @@
 #include "esphome/core/component.h"
 #include "esphome/components/web_server_base/web_server_base.h"
 #include "config_embed.h"
-#include "config-decrypt.h"
+#ifdef ESPHOME_CONFIG_BACKUP_GUI
+  #include "config-decrypt.h"
+#endif
 
 namespace esphome {
 namespace config_backup {
