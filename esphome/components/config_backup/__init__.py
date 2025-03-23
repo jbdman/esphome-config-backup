@@ -129,8 +129,9 @@ async def to_code(config):
     else:
         raise cv.Invalid(f"Unsupported encryption type: {encryption}")
 
-    b64_encoded = base64.b64encode(final_bytes).decode("utf-8")
-    gzip_compressed = gzip.compress(b64_encoded)
+    b64 = base64.b64encode(final_bytes)
+    b64_encoded = b64.decode("utf-8")
+    gzip_compressed = gzip.compress(b64)
 
     if debug == "print.b64" or debug == "print.*" or debug == "*":
         print(b64_encoded)
