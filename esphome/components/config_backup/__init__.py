@@ -112,4 +112,4 @@ async def to_code(config):
     server = await cg.get_variable(config[CONF_WEB_SERVER_BASE_ID])
     var = cg.new_Pvariable(config[CONF_ID], server)
     await cg.register_component(var, config)
-    cg.add('static const string ENCRYPTION = "{encryption}"'.format(encryption=encryption))
+    cg.add(var.set_encryption(encryption))
