@@ -8,12 +8,12 @@
 namespace esphome {
 namespace config_backup {
 
+using namespace web_server_base;
+
 #ifdef ESPHOME_CONFIG_BACKUP_GUI
 
 extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
 extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
-
-using namespace web_server_base;
 
 class InjectMiddlewareHandler : public AsyncWebHandler {
  public:
