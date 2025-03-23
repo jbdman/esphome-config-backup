@@ -35,6 +35,7 @@ from Crypto.Protocol.KDF import PBKDF2
 import secrets
 import os
 import base64
+import gzip
 
 CONFIG_BACKUP_NS = cg.esphome_ns.namespace("config_backup")
 ConfigBackup = CONFIG_BACKUP_NS.class_(
@@ -129,6 +130,7 @@ async def to_code(config):
         raise cv.Invalid(f"Unsupported encryption type: {encryption}")
 
     b64_encoded = base64.b64encode(final_bytes).decode("utf-8")
+    gzip_compressed = gzip.compress(b64_encoded)
 
     if debug == "print.b64" or debug == "print.*" or debug == "*":
         print(b64_encoded)
@@ -138,8 +140,8 @@ async def to_code(config):
         f.write('#pragma once\n\n')
         f.write('// Embedded config file (base64-encoded)\n')
         f.write('static const char CONFIG_B64[] PROGMEM =\n')
-        for i in range(0, len(b64_encoded), 80):
-            f.write(f'"{b64_encoded[i:i+80]}"\n')
+        for i in range(0, len(gzip_compressed), 80):
+            f.write(f'"{gzip_compressed[i:i+80]}"\n')
         f.write(';\n')
 
     print(f"[config_backup] Embedded config from {input_file} → {output_file} "
