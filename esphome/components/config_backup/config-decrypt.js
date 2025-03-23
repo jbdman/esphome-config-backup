@@ -188,6 +188,7 @@ function triggerDownload(fileContents, filename) {
     }, 0);
 }
 async function injectConfigBackupWidget() {
+    alert({{test}});
     // console.log("Injecting");
     const app = await waitForElement("esp-app");
     // console.log("Rendered.");
