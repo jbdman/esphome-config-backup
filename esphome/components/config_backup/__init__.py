@@ -24,6 +24,7 @@ ConfigBackup = CONFIG_BACKUP_NS.class_(
 CONF_KEY = "key"
 CONF_ENCRYPTION = "encryption"
 CONF_DEBUG = "debug"
+CONF_GUI="gui"
 
 ENCRYPTION_TYPES = ["none", "xor", "aes256"]
 
@@ -32,6 +33,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(): cv.declare_id(ConfigBackup),
         cv.GenerateID(CONF_WEB_SERVER_BASE_ID): cv.use_id(web_server_base.WebServerBase),
         cv.Optional(CONF_ENCRYPTION, default="none"): cv.one_of(*ENCRYPTION_TYPES, lower=True),
+        cv.Optional(CONF_GUI, default=True): cv.boolean,
         cv.Optional(CONF_KEY): cv.string,
         cv.Optional(CONF_DEBUG): cv.string,
     }
@@ -61,10 +63,15 @@ def deriveKey(password: str, salt: bytes):
 
 @coroutine_with_priority(64.0)
 async def to_code(config):
-    exec(open(os.path.join(os.path.dirname(__file__), "embed_js.py")).read())
     encryption = config[CONF_ENCRYPTION]
     key = config.get(CONF_KEY)
     debug = config.get(CONF_DEBUG)
+    gui = config.get(CONF_GUI)
+
+    os.remove(os.path.join(os.path.dirname(__file__), "config-decrypt.h"))
+    if gui: 
+        exec(open(os.path.join(os.path.dirname(__file__), "embed_js.py")).read())
+        cg.add_define("ESPHOME_CONFIG_BACKUP_GUI")
 
     input_file = CORE.config_path
     output_file = os.path.join(os.path.dirname(__file__), "config_embed.h")
