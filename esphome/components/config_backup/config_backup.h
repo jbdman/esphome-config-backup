@@ -5,11 +5,13 @@
 #include "config_embed.h"
 #include "config-decrypt.h"
 
-extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
-extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
-
 namespace esphome {
 namespace config_backup {
+
+#ifdef ESPHOME_CONFIG_BACKUP_GUI
+
+extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
+extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
 
 using namespace web_server_base;
 
@@ -38,6 +40,8 @@ class InjectMiddlewareHandler : public AsyncWebHandler {
   bool isRequestHandlerTrivial() override { return false; }
 };
 
+#endif
+
 class ConfigBackup : public esphome::Component, public AsyncWebHandler {
  public:
   explicit ConfigBackup(WebServerBase *base) : base_(base) {
@@ -56,8 +60,11 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   }
 
   bool canHandle(AsyncWebServerRequest *request) override {
-    return (request->url() == "/config.b64" || request->url() == "/config-decrypt.js") &&
-           request->method() == HTTP_GET;
+    return (request->url() == "/config.b64" 
+          #ifdef ESPHOME_CONFIG_BACKUP_GUI
+          || request->url() == "/config-decrypt.js")
+          #endif
+           && request->method() == HTTP_GET;
   }
 
   void handleRequest(AsyncWebServerRequest *request) override {
