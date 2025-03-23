@@ -68,7 +68,8 @@ async def to_code(config):
     debug = config.get(CONF_DEBUG)
     gui = config.get(CONF_GUI)
 
-    os.remove(os.path.join(os.path.dirname(__file__), "config-decrypt.h"))
+    jsPath = os.path.join(os.path.dirname(__file__), "config-decrypt.h")
+    if os.path.exists(jsPath): os.remove(jsPath)
     if gui: 
         exec(open(os.path.join(os.path.dirname(__file__), "embed_js.py")).read())
         cg.add_define("ESPHOME_CONFIG_BACKUP_GUI")
