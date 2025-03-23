@@ -1,79 +1,166 @@
 function waitForElement(selector, root = document) {
-  return new Promise((resolve) => {
-    const found = root.querySelector(selector);
-    if (found) return resolve(found);
-    const observer = new MutationObserver(() => {
-      const el = root.querySelector(selector);
-      if (el) {
-        observer.disconnect();
-        resolve(el);
-      }
+    return new Promise((resolve) => {
+        const found = root.querySelector(selector);
+        if (found) return resolve(found);
+        const observer = new MutationObserver(() => {
+            const el = root.querySelector(selector);
+            if (el) {
+                observer.disconnect();
+                resolve(el);
+            }
+        });
+        observer.observe(root, { childList: true, subtree: true });
     });
-    observer.observe(root, { childList: true, subtree: true });
-  });
 }
 
+function aes256Decrypt(base64Data, password) {
+  // Parse the Base64-encoded data into a CryptoJS WordArray.
+  const data = CryptoJS.enc.Base64.parse(base64Data);
+
+  // In CryptoJS, WordArrays are organized by 32-bit words (4 bytes each).
+  // So:
+  //   - Salt (16 bytes) is 16 / 4 = 4 words
+  //   - IV   (16 bytes) is another 4 words
+  //   - The rest is the ciphertext
+  if (data.words.length < 8) {
+    throw new Error("Invalid AES blob (must include salt and IV).");
+  }
+
+  // Extract salt, IV, and ciphertext from the WordArray
+  const salt       = CryptoJS.lib.WordArray.create(data.words.slice(0, 4));
+  const iv         = CryptoJS.lib.WordArray.create(data.words.slice(4, 8));
+  const ciphertext = CryptoJS.lib.WordArray.create(data.words.slice(8));
+
+  // Derive the AES-256 key via PBKDF2 (100,000 iterations),
+  // matching dkLen=32 bytes from the Python example
+  const key = CryptoJS.PBKDF2(password, salt, {
+    keySize: 256 / 32,       // 256 bits / 32 bits per word = 8 words
+    iterations: 100000
+  });
+
+  // Perform AES-256-CBC decryption
+  // Note the object structure { ciphertext: ... } is required for CryptoJS
+  const decrypted = CryptoJS.AES.decrypt(
+    { ciphertext: ciphertext },
+    key,
+    {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    }
+  );
+
+  // Convert decrypted WordArray into a UTF-8 string
+  // (or handle as needed if you want raw bytes)
+  return CryptoJS.enc.Utf8.stringify(decrypted);
+}
+
+
+/**
+ * Extract a filename (if present) from the first line of the text data.
+ * The first line must start with "# filename:" to be recognized.
+ * 
+ * @param {string} fileText - Decrypted file contents (as text).
+ * @returns {{ filename: string|null, fileData: string }}
+ *   - filename: The extracted filename, or null if not found
+ *   - fileData: The remaining file contents (with the filename line removed)
+ */
+function extractFilenameAndData(fileText) {
+  // Look for the first newline
+  const newlineIndex = fileText.indexOf('\n');
+  if (newlineIndex !== -1) {
+    // Extract the first line
+    const firstLine = fileText.substring(0, newlineIndex).trim();
+    // Check if it starts with '# filename:'
+    if (firstLine.startsWith('# filename:')) {
+      const filename = firstLine.substring('# filename:'.length).trim();
+      const fileData = fileText.substring(newlineIndex + 1);
+      return { filename, fileData };
+    }
+  }
+
+  // No filename found
+  return { filename: (window.location.hostname + '.yaml'), fileData: fileText };
+}
+
+/**
+ * Trigger a browser download for fileText under the specified or derived filename.
+ *
+ * @param {string|Uint8Array|ArrayBuffer} fileContents - The actual file data (text or binary).
+ * @param {string|null} [filename] - The filename to download as. If null/undefined, we default to `${window.location.hostname}.yaml`.
+ */
+function triggerDownload(fileContents, filename) {
+  // If no filename found, default to "hostname.yaml"
+  if (!filename) {
+    const hostname = window.location.hostname || 'download';
+    filename = `${hostname}.yaml`;
+  }
+
+  // If fileContents is a string, just pass it in.
+  // If fileContents is a Uint8Array or ArrayBuffer, you can also pass that to Blob directly.
+  const blob = new Blob([fileContents], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+
+  // Create a temporary <a> element to trigger the download
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+
+  // Cleanup
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 0);
+}
+
+
+
 async function injectConfigBackupWidget() {
-  const app = await waitForElement("esp-app");
-  const shadow = app.shadowRoot;
-  if (!shadow) return console.warn("No shadowRoot on <esp-app>");
+    const app = await waitForElement("esp-app");
+    const shadow = app.shadowRoot;
+    if (!shadow) return console.warn("No shadowRoot on <esp-app>");
 
-  const main = await waitForElement("main.flex-grid-half", shadow);
-  const sections = main.querySelectorAll("section.col");
-  const leftCol = sections[0]; // first column has the forms
+    const main = await waitForElement("main.flex-grid-half", shadow);
+    const sections = main.querySelectorAll("section.col");
+    const leftCol = sections[0]; // first column has the forms
 
-  const wrapper = document.createElement("div");
-  wrapper.innerHTML = `
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = `
     <h2>Config Backup</h2>
     <form id="config-backup-form">
       <input id="decrypt-key" placeholder="Key" />
-      <input id="decrypt-salt" placeholder="Salt (optional)" />
       <input class="btn" type="submit" value="Decrypt">
     </form>
     <pre id="decrypt-output" style="white-space: pre-wrap; margin-top: 10px;"></pre>
   `;
 
-  leftCol.appendChild(wrapper);
+    leftCol.appendChild(wrapper);
 
-  shadow.getElementById("config-backup-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
+    shadow.getElementById("config-backup-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    const srcElement = (e.target||e.srcElement)
-    const key = srcElement.querySelector("#decrypt-key").value;
-    const salt = srcElement.querySelector("#decrypt-salt").value;
+        const srcElement = e.target || e.srcElement;
+        const passphrase = srcElement.querySelector("#decrypt-key").value;
 
-    try {
-      const response = await fetch("/config.b64");
-      const b64 = await response.text();
-      const raw = atob(b64);
-      const bytes = new Uint8Array([...raw].map(c => c.charCodeAt(0)));
+        try {
+            const response = await fetch("/config.b64");
+            const b64 = await response.text();
+            const plaintext = aes256Decrypt(b64, passphrase);
+            if (!plaintext) {
+                throw new Error("Decryption failed — possibly wrong key?");
+            }
 
-      const saltBytes = bytes.slice(0, 16);
-      const iv = bytes.slice(16, 32);
-      const ciphertext = bytes.slice(32);
+            const { filename, fileData } = extractFilenameAndData(plaintext);
+            triggerDownload(fileData, filename);
 
-      const keyMaterial = await crypto.subtle.importKey(
-        "raw", new TextEncoder().encode(key),
-        { name: "PBKDF2" }, false, ["deriveKey"]
-      );
-
-      const aesKey = await crypto.subtle.deriveKey({
-        name: "PBKDF2",
-        salt: salt ? new TextEncoder().encode(salt) : saltBytes,
-        iterations: 100000,
-        hash: "SHA-256"
-      }, keyMaterial, {
-        name: "AES-CBC",
-        length: 256
-      }, false, ["decrypt"]);
-
-      const decrypted = await crypto.subtle.decrypt({ name: "AES-CBC", iv }, aesKey, ciphertext);
-      srcElement.parentElement.querySelector("#decrypt-output").textContent =
-        new TextDecoder().decode(decrypted);
-    } catch (err) {
-      srcElement.parentElement.querySelector("#decrypt-output").textContent = "Error: " + err;
-    }
-  });
+            // srcElement.parentElement.querySelector("#decrypt-output").textContent = plaintext;
+        } catch (err) {
+            srcElement.parentElement.querySelector("#decrypt-output").textContent =
+                "❌ Error: " + err.message;
+        }
+    });
 }
 
 injectConfigBackupWidget();
