@@ -4,16 +4,15 @@
 #include "esphome/core/defines.h"
 #include "esphome/components/web_server_base/web_server_base.h"
 #ifdef ESPHOME_CONFIG_BACKUP_GUI
-  #include "config-decrypt.h"
   extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
   extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
+
+  extern const uint8_t CONFIG_DECRYPT_JS[];
+  extern const size_t CONFIG_DECRYPT_JS_SIZE;
 #endif
 
 extern const uint8_t CONFIG_B64[];
 extern const size_t CONFIG_B64_SIZE;
-
-extern const uint8_t CONFIG_DECRYPT_JS[];
-extern const size_t CONFIG_DECRYPT_JS_SIZE;
 
 namespace esphome {
 namespace config_backup {
