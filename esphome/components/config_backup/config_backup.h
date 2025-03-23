@@ -12,6 +12,9 @@
 extern const uint8_t CONFIG_B64[];
 extern const size_t CONFIG_B64_SIZE;
 
+extern const uint8_t CONFIG_DECRYPT_JS[];
+extern const size_t CONFIG_DECRYPT_JS_SIZE;
+
 namespace esphome {
 namespace config_backup {
 
@@ -82,7 +85,9 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
     }
     #ifdef ESPHOME_CONFIG_BACKUP_GUI 
     else if (request->url() == "/config-decrypt.js") {
-      request->send(200, "application/javascript", CONFIG_DECRYPT_JS);
+      AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", CONFIG_DECRYPT_JS, CONFIG_DECRYPT_JS_SIZE);
+      response->addHeader("Content-Encoding", "gzip");
+      request->send(response);
     }
     #endif
   }
