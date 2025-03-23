@@ -26,7 +26,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   void handleRequest(AsyncWebServerRequest *request) override {
     if(request->url() == "/config.b64"){
       AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", CONFIG_B64);
-      response->addHeader("X-Encryption-Type","aes256");
+      response->addHeader("X-Encryption-Type",ENCRYPTION);
       request->send(response);
     } else if (request->url() == "/config-decrypt.js"){
       request->send(200, "application/javascript", CONFIG_DECRYPT_JS);
