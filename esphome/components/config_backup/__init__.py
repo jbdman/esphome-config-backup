@@ -123,6 +123,8 @@ async def to_code(config):
     filename = os.path.basename(input_file)
     yaml_with_comment = f"# filename: {filename}\n".encode("utf-8") + yaml_bytes
 
+    # gzip_yaml_with_comment = gzip.compress(yaml_with_comment)
+
     if encryption == "xor":
         if not key:
             raise cv.Invalid("Encryption type 'xor' requires a 'key' to be specified.")
@@ -156,17 +158,8 @@ async def to_code(config):
     cg.add_global(cg.RawExpression(config_uint8_t))
     cg.add_global(cg.RawExpression(config_size_t))
 
-    # os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    # with open(output_file, "w", encoding="utf-8") as f:
-    #     f.write('#pragma once\n\n')
-    #     f.write('// Embedded config file (base64-encoded)\n')
-    #     f.write('static const char CONFIG_B64[] PROGMEM =\n')
-    #     for i in range(0, len(gzip_compressed), 80):
-    #         f.write(f'"{gzip_compressed[i:i+80]}"\n')
-    #     f.write(';\n')
-
-    # print(f"[config_backup] Embedded config from {input_file} → {output_file} "
-    #       f"({'encrypted' if encryption != 'none' else 'plain'})")
+    print(f"[config_backup] Embedded config from {input_file} "
+          f"({'encrypted' if encryption != 'none' else 'plain'})")
 
     server = await cg.get_variable(config[CONF_WEB_SERVER_BASE_ID])
     var = cg.new_Pvariable(config[CONF_ID], server)
