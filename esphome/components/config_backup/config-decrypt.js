@@ -13,6 +13,22 @@ function waitForElement(selector, root = document) {
     });
 }
 
+function waitForShadowRoot(element) {
+  return new Promise((resolve) => {
+    if (element.shadowRoot) return resolve(element.shadowRoot);
+
+    const observer = new MutationObserver(() => {
+      if (element.shadowRoot) {
+        observer.disconnect();
+        resolve(element.shadowRoot);
+      }
+    });
+
+    observer.observe(element, { childList: false, subtree: false, attributes: true });
+  });
+}
+
+
 function aes256Decrypt(base64Data, password) {
   // Parse the Base64-encoded data into a CryptoJS WordArray.
   const data = CryptoJS.enc.Base64.parse(base64Data);
@@ -165,7 +181,7 @@ function triggerDownload(fileContents, filename) {
 
 async function injectConfigBackupWidget() {
     const app = await waitForElement("esp-app");
-    const shadow = app.shadowRoot;
+    const shadow = await waitForShadowRoot(app);
     if (!shadow) return console.warn("No shadowRoot on <esp-app>");
 
     const main = await waitForElement("main.flex-grid-half", shadow);
