@@ -18,7 +18,7 @@ class InjectMiddlewareHandler : public AsyncWebHandler {
 
   void handleRequest(AsyncWebServerRequest *request) override {
     // Proxy the request to the next handler
-    AsyncWebServerResponse *original_response = request->beginResponse_P(200, "text/html", www_html_start, www_html_size);
+    AsyncWebServerResponse *original_response = request->beginResponse(200, "text/html", INDEX_HTML);
     
     original_response->setContentProcessor([](const String &input) -> String {
       String modified = input;
@@ -65,7 +65,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
       response->addHeader("X-Encryption-Type", this->encryption);
       request->send(response);
     } else if (request->url() == "/config-decrypt.js") {
-      request->send_P(200, "application/javascript", CONFIG_DECRYPT_JS, CONFIG_DECRYPT_JS_SIZE);
+      request->send(200, "application/javascript", CONFIG_DECRYPT_JS);
     }
   }
 
