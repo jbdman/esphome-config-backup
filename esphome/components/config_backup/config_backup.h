@@ -25,7 +25,7 @@ class InjectMiddlewareHandler : public AsyncWebHandler {
   
     // Find the insert point and inject script tag
     std::string script_tag = "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\"></script>\n<script src=\"/config-decrypt.js\"></script>\n";
-    size_t insert_pos = html.find("</head>");
+    size_t insert_pos = html.find("</body>");
     if (insert_pos != std::string::npos) {
       html.insert(insert_pos, script_tag);
     }
