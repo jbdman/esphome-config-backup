@@ -3,12 +3,14 @@
 #include "esphome/core/component.h"
 #include "esphome/core/defines.h"
 #include "esphome/components/web_server_base/web_server_base.h"
-#include "config_embed.h"
 #ifdef ESPHOME_CONFIG_BACKUP_GUI
   #include "config-decrypt.h"
   extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
   extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
 #endif
+
+extern const uint8_t CONFIG_B64[];
+extern const size_t CONFIG_B64_SIZE;
 
 namespace esphome {
 namespace config_backup {
