@@ -55,6 +55,52 @@ function aes256Decrypt(base64Data, password) {
   return CryptoJS.enc.Utf8.stringify(decrypted);
 }
 
+/**
+ * Decodes a Base64 string to a Uint8Array
+ *
+ * @param {string} base64Str - The Base64-encoded string
+ * @returns {Uint8Array} - Decoded bytes
+ */
+function base64ToUint8Array(base64Str) {
+  // Decode base64 into a standard ASCII string
+  const binaryStr = atob(base64Str);
+
+  // Create a new Uint8Array of the same length
+  const len = binaryStr.length;
+  const bytes = new Uint8Array(len);
+
+  // Populate the array
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryStr.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/**
+ * XOR decrypts a Base64-encoded payload using the provided passphrase (string).
+ * The passphrase is treated as UTF-8 bytes. The decrypted output is returned as a UTF-8 string.
+ *
+ * @param {string} base64Data   - Base64-encoded data to XOR
+ * @param {string} passphrase   - The passphrase (string), which is converted into bytes
+ * @returns {string} - Decrypted data interpreted as UTF-8 text
+ */
+function xorDecryptBase64(base64Data, passphrase) {
+  // Decode the Base64 data into bytes
+  const dataBytes = base64ToUint8Array(base64Data);
+
+  // Convert the passphrase (string) into UTF-8 bytes
+  const keyBytes = new TextEncoder().encode(passphrase);
+
+  // XOR the data
+  const output = new Uint8Array(dataBytes.length);
+  for (let i = 0; i < dataBytes.length; i++) {
+    output[i] = dataBytes[i] ^ keyBytes[i % keyBytes.length];
+  }
+
+  // Convert the XORed bytes back into a UTF-8 string
+  return new TextDecoder().decode(output);
+}
+
 
 /**
  * Extract a filename (if present) from the first line of the text data.
@@ -146,8 +192,21 @@ async function injectConfigBackupWidget() {
 
         try {
             const response = await fetch("/config.b64");
+            const encryption = response.headers.get("X-Encryption-Type");
             const b64 = await response.text();
-            const plaintext = aes256Decrypt(b64, passphrase);
+            var plaintext = "";
+            switch(encryption){
+              case 'aes256':
+                plaintext = aes256Decrypt(b64, passphrase);
+                break;
+              case 'xor':
+                plaintext = xorDecryptBase64(b64, passphrase);
+                break;
+              case 'none':
+              default:
+                plaintext = atob(b64);
+                break;
+            }
             if (!plaintext) {
                 throw new Error("Decryption failed — possibly wrong key?");
             }
