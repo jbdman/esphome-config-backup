@@ -50,7 +50,7 @@ def main():
     args = parser.parse_args()
 
     # Validate encryption/key/salt combos
-    if args.encryption == "none" and args.key:
+    if (args.encryption == "none" and args.key) and not (args.input.startswith("http://") or args.input.startswith("https://")):
         print("[!] Error: --key was specified but --encryption is 'none'")
         sys.exit(1)
 
@@ -72,6 +72,10 @@ def main():
             print(f"[!] Failed to fetch: {resp.status_code}")
             sys.exit(1)
         b64 = resp.text.strip()
+        encryption = resp.headers['X-Encryption-Type']
+        if args.encryption == "none" and encryption != "none":
+            print(f"[*] Read encryption type from X-Encryption-Type header: {encryption}")
+            args.encryption = encryption
     else:
         with open(args.input, "r", encoding="utf-8") as f:
             b64 = f.read().strip()
