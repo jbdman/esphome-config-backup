@@ -1,3 +1,0 @@
-[submodule "esphome/components/config_backup/UglifyJS"]
-	path = esphome/components/config_backup/UglifyJS
-	url = https://github.com/mishoo/UglifyJS
