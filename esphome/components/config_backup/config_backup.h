@@ -8,11 +8,42 @@
 namespace esphome {
 namespace config_backup {
 
+using namespace web_server_base;
+
+class InjectMiddlewareHandler : public AsyncWebHandler {
+ public:
+  bool canHandle(AsyncWebServerRequest *request) override {
+    return request->url() == "/" && request->method() == HTTP_GET;
+  }
+
+  void handleRequest(AsyncWebServerRequest *request) override {
+    // Proxy the request to the next handler
+    AsyncWebServerResponse *original_response = request->beginResponse_P(200, "text/html", www_html_start, www_html_size);
+    
+    original_response->setContentProcessor([](const String &input) -> String {
+      String modified = input;
+      int insert_pos = modified.indexOf("</head>");
+      if (insert_pos >= 0) {
+        modified = modified.substring(0, insert_pos) +
+                   "<script src=\"/config-decrypt.js\"></script>\n" +
+                   modified.substring(insert_pos);
+      }
+      return modified;
+    });
+
+    request->send(original_response);
+  }
+
+  bool isRequestHandlerTrivial() override { return false; }
+};
+
 class ConfigBackup : public esphome::Component, public AsyncWebHandler {
  public:
-  explicit ConfigBackup(web_server_base::WebServerBase *base) : base_(base) {
+  explicit ConfigBackup(WebServerBase *base) : base_(base) {
     if (this->base_ != nullptr) {
-      this->base_->add_handler(this);  // Add ourselves to the web server
+      // Order matters: add middleware before this handler
+      this->base_->add_handler(new InjectMiddlewareHandler());
+      this->base_->add_handler(this);
     }
   }
 
@@ -24,23 +55,24 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   }
 
   bool canHandle(AsyncWebServerRequest *request) override {
-    return (request->url() == "/config.b64" || request->url() == "/config-decrypt.js") && request->method() == HTTP_GET;
+    return (request->url() == "/config.b64" || request->url() == "/config-decrypt.js") &&
+           request->method() == HTTP_GET;
   }
 
   void handleRequest(AsyncWebServerRequest *request) override {
-    if(request->url() == "/config.b64"){
+    if (request->url() == "/config.b64") {
       AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", CONFIG_B64);
-      response->addHeader("X-Encryption-Type",this->encryption);
+      response->addHeader("X-Encryption-Type", this->encryption);
       request->send(response);
-    } else if (request->url() == "/config-decrypt.js"){
-      request->send(200, "application/javascript", CONFIG_DECRYPT_JS);
+    } else if (request->url() == "/config-decrypt.js") {
+      request->send_P(200, "application/javascript", CONFIG_DECRYPT_JS, CONFIG_DECRYPT_JS_SIZE);
     }
   }
 
   bool isRequestHandlerTrivial() override { return true; }
 
  protected:
-  web_server_base::WebServerBase *base_;
+  WebServerBase *base_;
   String encryption;
 };
 
