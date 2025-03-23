@@ -47,7 +47,9 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   explicit ConfigBackup(WebServerBase *base) : base_(base) {
     if (this->base_ != nullptr) {
       // Order matters: add middleware before this handler
-      this->base_->add_handler(new InjectMiddlewareHandler());
+      #ifdef ESPHOME_CONFIG_BACKUP_GUI
+        this->base_->add_handler(new InjectMiddlewareHandler());
+      #endif
       this->base_->add_handler(this);
     }
   }
@@ -62,9 +64,9 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   bool canHandle(AsyncWebServerRequest *request) override {
     return (request->url() == "/config.b64" 
           #ifdef ESPHOME_CONFIG_BACKUP_GUI
-          || request->url() == "/config-decrypt.js")
+            || request->url() == "/config-decrypt.js"
           #endif
-           && request->method() == HTTP_GET;
+           ) && request->method() == HTTP_GET;
   }
 
   void handleRequest(AsyncWebServerRequest *request) override {
