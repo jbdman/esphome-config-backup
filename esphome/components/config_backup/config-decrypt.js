@@ -188,7 +188,6 @@ function triggerDownload(fileContents, filename) {
     }, 0);
 }
 async function injectConfigBackupWidget() {
-    alert({{test}});
     // console.log("Injecting");
     const app = await waitForElement("esp-app");
     // console.log("Rendered.");
@@ -221,7 +220,7 @@ async function injectConfigBackupWidget() {
         srcElement.parentElement.querySelector("#decrypt-output").textContent = "";
 
         try {
-            const response = await fetch("/config.b64");
+            const response = await fetch("{{path}}");
             const encryption = response.headers.get("X-Encryption-Type");
             const compress = response.headers.get("X-Compression-Type");
             const b64 = await response.text();
