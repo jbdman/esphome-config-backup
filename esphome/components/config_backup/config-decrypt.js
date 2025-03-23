@@ -189,6 +189,7 @@ async function injectConfigBackupWidget() {
 
         const srcElement = e.target || e.srcElement;
         const passphrase = srcElement.querySelector("#decrypt-key").value;
+        srcElement.parentElement.querySelector("#decrypt-output").textContent = "";
 
         try {
             const response = await fetch("/config.b64");
