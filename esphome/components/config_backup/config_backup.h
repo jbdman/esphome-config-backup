@@ -19,6 +19,10 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   void setup() override {}
   void dump_config() override {}
 
+  void set_encryption(string encryption) {
+    this->encryption = encryption;
+  }
+
   bool canHandle(AsyncWebServerRequest *request) override {
     return (request->url() == "/config.b64" || request->url() == "/config-decrypt.js") && request->method() == HTTP_GET;
   }
@@ -37,6 +41,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
 
  protected:
   web_server_base::WebServerBase *base_;
+  string encryption;
 };
 
 }  // namespace config_backup
