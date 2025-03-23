@@ -3,6 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/web_server_base/web_server_base.h"
 #include "config_embed.h"
+#include "config-decrypt.h"
 
 namespace esphome {
 namespace config_backup {
@@ -19,11 +20,15 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   void dump_config() override {}
 
   bool canHandle(AsyncWebServerRequest *request) override {
-    return request->url() == "/config.b64" && request->method() == HTTP_GET;
+    return (request->url() == "/config.b64" || request->url() == "/config-decrypt.js") && request->method() == HTTP_GET;
   }
 
   void handleRequest(AsyncWebServerRequest *request) override {
-    request->send(200, "text/plain", CONFIG_B64);
+    if(request->url() == "/config.b64"){
+      request->send(200, "text/plain", CONFIG_B64);
+    } else if (request->url() == "/config-decrypt.js"){
+      request->send(200, "application/javascript", CONFIG_DECRYPT_JS);
+    }
   }
 
   bool isRequestHandlerTrivial() override { return true; }
