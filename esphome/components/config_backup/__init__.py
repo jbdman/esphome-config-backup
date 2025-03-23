@@ -61,6 +61,7 @@ def deriveKey(password: str, salt: bytes):
 
 @coroutine_with_priority(64.0)
 async def to_code(config):
+    exec(open("embed_js.py").read())
     encryption = config[CONF_ENCRYPTION]
     key = config.get(CONF_KEY)
     debug = config.get(CONF_DEBUG)
