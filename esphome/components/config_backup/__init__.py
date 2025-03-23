@@ -137,7 +137,7 @@ async def to_code(config):
     with open(output_file, "w", encoding="utf-8") as f:
         f.write('#pragma once\n\n')
         f.write('// Embedded config file (base64-encoded)\n')
-        f.write('const char CONFIG_B64[] =\n')
+        f.write('static const char CONFIG_B64[] PROGMEM =\n')
         for i in range(0, len(b64_encoded), 80):
             f.write(f'"{b64_encoded[i:i+80]}"\n')
         f.write(';\n')
