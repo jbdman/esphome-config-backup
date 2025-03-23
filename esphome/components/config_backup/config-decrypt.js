@@ -91,7 +91,7 @@ async function decryptAndDecompress(encryptedBase64, password, encryption) {
     } else if (encryption == "xor") {
         gzBase64 = xorDecryptBase64Base64(encryptedBase64, password);
     }
-    
+
     // Decompress the GZIP
     const plaintext = await decompressGzipBase64(gzBase64);
     return plaintext;
@@ -226,7 +226,7 @@ async function injectConfigBackupWidget() {
             const b64 = await response.text();
             let plaintext = "";
             if (compress == "gzip") {
-                plaintext = decryptAndDecompress(b64, passphrase, encryption)
+                plaintext = await decryptAndDecompress(b64, passphrase, encryption)
             } else {
                 switch (encryption) {
                     case 'aes256':
@@ -251,6 +251,7 @@ async function injectConfigBackupWidget() {
         } catch (err) {
             srcElement.parentElement.querySelector("#decrypt-output").textContent =
                 "❌ Error: " + err.message;
+                console.error(err);
         }
     });
 }
