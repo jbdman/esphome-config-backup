@@ -86,7 +86,6 @@ async def to_code(config):
         salt_bytes = secrets.token_bytes(16)
         derived_key = deriveKey(key, salt_bytes)
         final_bytes = salt_bytes + aes256_encrypt(yaml_with_comment, derived_key)
-
     elif encryption == "none":
         print("[config_backup] Embedding config without encryption")
         final_bytes = yaml_with_comment
