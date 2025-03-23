@@ -1,21 +1,46 @@
-window.addEventListener("DOMContentLoaded", () => {
-  const container = document.querySelector(".cards");
-  if (!container) return;
+function waitForElement(selector, root = document) {
+  return new Promise((resolve) => {
+    const found = root.querySelector(selector);
+    if (found) return resolve(found);
+    const observer = new MutationObserver(() => {
+      const el = root.querySelector(selector);
+      if (el) {
+        observer.disconnect();
+        resolve(el);
+      }
+    });
+    observer.observe(root, { childList: true, subtree: true });
+  });
+}
 
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <h2>Decrypt Embedded Config</h2>
-    <label>Key: <input type="text" id="decrypt-key"></label><br>
-    <label>Salt: <input type="text" id="decrypt-salt"></label><br>
-    <button id="decrypt-btn">Decrypt</button>
+async function injectConfigBackupWidget() {
+  const app = await waitForElement("esp-app");
+  const shadow = app.shadowRoot;
+  if (!shadow) return console.warn("No shadowRoot on <esp-app>");
+
+  const main = await waitForElement("main.flex-grid-half", shadow);
+  const sections = main.querySelectorAll("section.col");
+  const leftCol = sections[0]; // first column has the forms
+
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = `
+    <h2>Config Backup</h2>
+    <form id="config-backup-form">
+      <input id="decrypt-key" placeholder="Key" />
+      <input id="decrypt-salt" placeholder="Salt (optional)" />
+      <input class="btn" type="submit" value="Decrypt">
+    </form>
     <pre id="decrypt-output" style="white-space: pre-wrap; margin-top: 10px;"></pre>
   `;
-  container.appendChild(card);
 
-  document.getElementById("decrypt-btn").addEventListener("click", async () => {
-    const key = document.getElementById("decrypt-key").value;
-    const salt = document.getElementById("decrypt-salt").value;
+  leftCol.appendChild(wrapper);
+
+  shadow.getElementById("config-backup-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const srcElement = (e.target||e.srcElement)
+    const key = srcElement.querySelector("#decrypt-key").value;
+    const salt = srcElement.querySelector("#decrypt-salt").value;
 
     try {
       const response = await fetch("/config.b64");
@@ -43,10 +68,12 @@ window.addEventListener("DOMContentLoaded", () => {
       }, false, ["decrypt"]);
 
       const decrypted = await crypto.subtle.decrypt({ name: "AES-CBC", iv }, aesKey, ciphertext);
-      document.getElementById("decrypt-output").textContent =
+      srcElement.parentElement.querySelector("#decrypt-output").textContent =
         new TextDecoder().decode(decrypted);
     } catch (err) {
-      document.getElementById("decrypt-output").textContent = "Error: " + err;
+      srcElement.parentElement.querySelector("#decrypt-output").textContent = "Error: " + err;
     }
   });
-});
+}
+
+injectConfigBackupWidget();
