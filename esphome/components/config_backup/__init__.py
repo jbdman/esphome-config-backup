@@ -42,6 +42,11 @@ CONFIG_SCHEMA = cv.Schema(
 AUTO_LOAD = ["web_server_base"]
 REQUIRES = ["web_server_base"]
 CODEOWNERS = ["@jbdman"]
+REQUIRED_PYTHON_MODULES = [
+    'cryptography',
+    'pycryptodome',
+    'jsmin',
+]
 
 def xor_encrypt(data: bytes, key: bytes) -> bytes:
     return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
