@@ -95,7 +95,7 @@ def aes256_encrypt(data: bytes, key: bytes) -> bytes:
     return iv + ciphertext
 
 
-def deriveKey(passphrase: str, salt: bytes, iterations=100_000) -> bytes:
+def deriveKey(passphrase: str, salt: bytes, iterations=100000) -> bytes:
     """Derive a 256-bit key from passphrase + salt using PBKDF2/HMAC-SHA256."""
     return hashlib.pbkdf2_hmac('sha256', passphrase.encode('utf-8'), salt, iterations)
 
