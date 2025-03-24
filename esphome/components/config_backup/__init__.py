@@ -39,7 +39,7 @@ from cryptography.hazmat.backends import default_backend
 from Crypto.Protocol.KDF import PBKDF2
 import gzip
 
-print("\033[32mINFO [config_backup] Cloning submodules...\033[0m")
+print("\033[32mINFO [config_backup] Updating submodules...\033[0m")
 git.run_git_command(["git", "submodule", "update", "--init"],os.path.join(os.path.dirname(__file__),"..", "..", ".."))
 
 sys.path.append(os.path.join(os.path.dirname(__file__),"..", "..", "..", "bin", "Python"))
@@ -145,17 +145,17 @@ async def to_code(config):
     if encryption == "xor":
         if not key:
             raise cv.Invalid("Encryption type 'xor' requires a 'key' to be specified.")
-        print("[config_backup] Encrypting config using XOR")
+        print("\033[32mINFO [config_backup] Encrypting config using XOR\033[0m")
         final_bytes = xor_encrypt(yaml_with_comment, key.encode("utf-8"))
     elif encryption == "aes256":
         if not key:
             raise cv.Invalid("Encryption type 'aes256' requires a 'key' to be specified.")
-        print("[config_backup] Encrypting config using AES-256")
+        print("\033[32mINFO [config_backup] Encrypting config using AES-256\033[0m")
         salt_bytes = secrets.token_bytes(16)
         derived_key = deriveKey(key, salt_bytes)
         final_bytes = salt_bytes + aes256_encrypt(yaml_with_comment, derived_key)
     elif encryption == "none":
-        print("[config_backup] Embedding config without encryption")
+        print("\033[32mINFO [config_backup] Embedding config without encryption\033[0m")
         final_bytes = yaml_with_comment
     else:
         raise cv.Invalid(f"Unsupported encryption type: {encryption}")
@@ -165,7 +165,7 @@ async def to_code(config):
     gzip_compressed = gzip.compress(b64)
 
     if debug == "print.b64" or debug == "print.*" or debug == "*":
-        print(b64_encoded)
+        print(f"\033[32mINFO [config_backup] b64_encoded: {b64_encoded}\033[0m")
 
     bytes_as_int = ", ".join(str(x) for x in gzip_compressed)
 
@@ -175,8 +175,8 @@ async def to_code(config):
     cg.add_global(cg.RawExpression(config_uint8_t))
     cg.add_global(cg.RawExpression(config_size_t))
 
-    print(f"[config_backup] Embedded config from {input_file} "
-          f"({'encrypted' if encryption != 'none' else 'plain'})")
+    print(f"\033[32mINFO [config_backup] Embedded config from {input_file} "
+          f"({'encrypted' if encryption != 'none' else 'plain'})\033[0m")
 
     server = await cg.get_variable(config[CONF_WEB_SERVER_BASE_ID])
     var = cg.new_Pvariable(config[CONF_ID], server)
