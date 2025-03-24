@@ -13,6 +13,11 @@ from esphome.components.web_server_base import CONF_WEB_SERVER_BASE_ID
 from esphome.const import CONF_ID
 from esphome.core import CORE, coroutine_with_priority
 
+# We now switch fully to the "cryptography" library for AES:
+from cryptography.hazmat.primitives import padding as aes_padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
 # --------------------------------------------------------------------
 # Setup Python logging
 # --------------------------------------------------------------------
@@ -48,7 +53,6 @@ def ensure_package(package_name, import_name=None):
             sys.exit(1)
 
 ensure_package('cryptography')
-ensure_package('pycryptodome', 'Crypto')
 ensure_package('mini-racer', 'py_mini_racer')
 
 # --------------------------------------------------------------------
@@ -73,12 +77,9 @@ import uglify_wrapper
 
 # --------------------------------------------------------------------
 # Embed logic (compression, encryption, placeholder replacement, etc.).
-# Adapted from the approach in your snippet.
 # --------------------------------------------------------------------
 import gzip
 import hashlib
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
 from cryptography.fernet import Fernet
 
 
@@ -88,11 +89,19 @@ def xor_encrypt(data: bytes, key: bytes) -> bytes:
 
 
 def aes256_encrypt(data: bytes, key: bytes) -> bytes:
-    """AES-256 encryption (CBC) with a random IV prepended."""
-    cipher = AES.new(key, AES.MODE_CBC)
-    iv = cipher.iv
-    ciphertext = cipher.encrypt(pad(data, AES.block_size))
-    return iv + ciphertext
+    """
+    AES-256 encryption (CBC) with a random IV prepended.
+    This matches the snippet you mentioned, ensuring the key must be 16, 24, or 32 bytes.
+    """
+    if len(key) not in (16, 24, 32):
+        raise ValueError("AES key must be 16, 24, or 32 bytes long")
+    iv = secrets.token_bytes(16)
+    padder = aes_padding.PKCS7(128).padder()
+    padded_data = padder.update(data) + padder.finalize()
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    encrypted = encryptor.update(padded_data) + encryptor.finalize()
+    return iv + encrypted
 
 
 def deriveKey(passphrase: str, salt: bytes, iterations=100000) -> bytes:
@@ -211,7 +220,7 @@ CONFIG_SCHEMA = cv.Schema({
 AUTO_LOAD = ["web_server_base"]
 REQUIRES = ["web_server_base"]
 CODEOWNERS = ["@jbdman"]
-REQUIRED_PYTHON_MODULES = ['cryptography','pycryptodome','jsmin']
+REQUIRED_PYTHON_MODULES = ['cryptography','jsmin']
 
 @coroutine_with_priority(64.0)
 async def to_code(config):
