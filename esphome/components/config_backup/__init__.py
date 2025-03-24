@@ -20,7 +20,7 @@ def ensure_package(package_name, import_name=None):
 ensure_package('cryptography')
 ensure_package('pycryptodome', 'Crypto')
 ensure_package('gzip')
-ensure_package('mini-racer')
+ensure_package('mini-racer', 'py_mini_racer')
 
 
 import esphome.codegen as cg
