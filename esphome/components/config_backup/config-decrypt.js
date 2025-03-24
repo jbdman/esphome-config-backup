@@ -1,3 +1,4 @@
+()=>{
 function waitForElement(selector, root=(document)) {
     return new Promise((resolve) => {
         const found = root.querySelector(selector);
@@ -255,3 +256,4 @@ if (document.readyState === "loading") {
 } else {
     injectConfigBackupWidget();
 }
+}()
