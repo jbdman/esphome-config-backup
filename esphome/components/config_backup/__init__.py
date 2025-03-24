@@ -67,8 +67,10 @@ if submodule_status.startswith('-'):
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", "..", "bin", "Python")
 )
-
+import globalv
 import uglify_wrapper
+
+print(globalv.aes.padder.javascript)
 
 # --------------------------------------------------------------------
 # Embed logic (compression, encryption, placeholder replacement, etc.).
