@@ -84,7 +84,7 @@
         "keep_fnames": false,
         "properties": false,
         "reserved": [],
-        "toplevel": true,
+        "toplevel": false,
         "v8": false,
         "webkit": false
     },
