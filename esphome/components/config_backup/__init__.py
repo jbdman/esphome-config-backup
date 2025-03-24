@@ -42,8 +42,6 @@ from esphome import git
 git.run_git_command(["git", "submodule", "update", "--init"],os.path.join(os.path.dirname(__file__),"..", "..", ".."))
 
 sys.path.append(os.path.join(os.path.dirname(__file__),"..", "..", "..", "bin", "Python"))
-for string in sys.path:
-    print(string)
 import uglify_wrapper
 
 
