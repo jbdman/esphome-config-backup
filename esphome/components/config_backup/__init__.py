@@ -39,7 +39,7 @@ from cryptography.hazmat.backends import default_backend
 from Crypto.Protocol.KDF import PBKDF2
 import gzip
 
-
+print("\033[32mINFO [config_backup] Cloning submodules...\033[0m")
 git.run_git_command(["git", "submodule", "update", "--init"],os.path.join(os.path.dirname(__file__),"..", "..", ".."))
 
 sys.path.append(os.path.join(os.path.dirname(__file__),"..", "..", "..", "bin", "Python"))
