@@ -201,14 +201,7 @@ async function injectConfigBackupWidget() {
     await waitForElement('form[action="/update"]', leftCol);
 
     const wrapper = document.createElement("div");
-    wrapper.innerHTML = `
-        <h2>Config Backup</h2>
-        <form id="config-backup-form">
-          <input id="decrypt-key" placeholder="Key" />&nbsp;
-          <input class="btn" type="submit" value="Decrypt">
-        </form>
-        <pre id="decrypt-output" style="white-space: pre-wrap; margin-top: 10px;"></pre>
-    `;
+    wrapper.innerHTML = `<h2>Config Backup</h2><form id="config-backup-form"><input id="decrypt-key" placeholder="Key" />&nbsp;<input class="btn" type="submit" value="Decrypt"></form><pre id="decrypt-output" style="white-space: pre-wrap; margin-top: 10px;"></pre>`;
 
     leftCol.appendChild(wrapper);
 

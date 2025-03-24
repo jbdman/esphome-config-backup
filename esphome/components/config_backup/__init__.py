@@ -21,6 +21,7 @@ ensure_package('cryptography')
 ensure_package('pycryptodome', 'Crypto')
 ensure_package('gzip')
 ensure_package('jsmin')
+ensure_package('mini-racer')
 
 
 import esphome.codegen as cg
