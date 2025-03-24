@@ -37,6 +37,7 @@ import secrets
 import os
 import base64
 import gzip
+from esphome import git
 
 sys.path.append(os.path.join(os.path.dirname(__file__),"..", "..", "..", "bin", "Python"))
 for string in sys.path:
