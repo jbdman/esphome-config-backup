@@ -76,7 +76,8 @@ function aes256DecryptToBase64(base64Data, password) {
   // Derive AES key via PBKDF2
   const key = CryptoJS.PBKDF2(password, salt, {
     keySize: 256 / 32,
-    iterations: 100000
+    iterations: 100000,
+    hasher: CryptoJS.algo.SHA256
   });
 
   // Decrypt using AES-256 CBC
@@ -157,7 +158,8 @@ function aes256Decrypt(base64Data, password) {
 
   const key = CryptoJS.PBKDF2(password, salt, {
     keySize: 256 / 32,
-    iterations: 100000
+    iterations: 100000,
+    hasher: CryptoJS.algo.SHA256
   });
 
   const decrypted = CryptoJS.AES.decrypt({
