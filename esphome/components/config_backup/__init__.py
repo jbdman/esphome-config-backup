@@ -1,5 +1,15 @@
 import subprocess
 import sys
+import os
+import base64
+import secrets
+import esphome.codegen as cg
+import esphome.config_validation as cv
+from esphome import git
+from esphome.components import web_server_base
+from esphome.components.web_server_base import CONF_WEB_SERVER_BASE_ID
+from esphome.const import CONF_ID
+from esphome.core import CORE, coroutine_with_priority
 
 def ensure_package(package_name, import_name=None):
     import_name = import_name or package_name
@@ -23,21 +33,12 @@ ensure_package('gzip')
 ensure_package('mini-racer', 'py_mini_racer')
 
 
-import esphome.codegen as cg
-import esphome.config_validation as cv
-from esphome.components import web_server_base
-from esphome.components.web_server_base import CONF_WEB_SERVER_BASE_ID
-from esphome.const import CONF_ID
-from esphome.core import CORE, coroutine_with_priority
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding as aes_padding
 from cryptography.hazmat.backends import default_backend
 from Crypto.Protocol.KDF import PBKDF2
-import secrets
-import os
-import base64
 import gzip
-from esphome import git
+
 
 git.run_git_command(["git", "submodule", "update", "--init"],os.path.join(os.path.dirname(__file__),"..", "..", ".."))
 
