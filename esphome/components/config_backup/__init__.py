@@ -20,7 +20,6 @@ def ensure_package(package_name, import_name=None):
 ensure_package('cryptography')
 ensure_package('pycryptodome', 'Crypto')
 ensure_package('gzip')
-ensure_package('jsmin')
 ensure_package('mini-racer')
 
 
@@ -38,7 +37,10 @@ import secrets
 import os
 import base64
 import gzip
-from jsmin import jsmin
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "bin", "Python"))
+import uglify_wrapper
+
 
 CONFIG_BACKUP_NS = cg.esphome_ns.namespace("config_backup")
 ConfigBackup = CONFIG_BACKUP_NS.class_(
@@ -112,7 +114,7 @@ async def to_code(config):
     if gui: 
         input_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
         with open(input_file, "r", encoding="utf-8") as f:
-            js_content = jsmin(f.read().replace("{{path}}",config_path))
+            js_content = uglify_wrapper.minify_js(f.read().replace("{{path}}",config_path))
         js_bytes = js_content.encode("utf-8")
         gzip_compressed = gzip.compress(js_bytes)
         bytes_as_int = ", ".join(str(x) for x in gzip_compressed)
