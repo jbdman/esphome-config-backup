@@ -6,6 +6,7 @@ import gzip
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from Crypto.Protocol.KDF import PBKDF2
+from Crypto.Hash import SHA256
 
 
 def xor_decrypt(data: bytes, key: bytes) -> bytes:
@@ -19,14 +20,14 @@ def aes256_decrypt(data: bytes, password: str) -> bytes:
     iv = data[16:32]
     ciphertext = data[32:]
 
-    key = PBKDF2(password, salt=salt, dkLen=32, count=100000)
+    key = PBKDF2(password, salt=salt, dkLen=32, count=100000, hmac_hash_module=SHA256)
     cipher = AES.new(key, AES.MODE_CBC, iv)
     return unpad(cipher.decrypt(ciphertext), AES.block_size)
 
 
 def derive_key(password: str, salt: str) -> bytes:
     print(f"[*] Deriving AES key from password and salt...")
-    return PBKDF2(password, salt=salt.encode("utf-8"), dkLen=32, count=100000)
+    return PBKDF2(password, salt=salt.encode("utf-8"), dkLen=32, count=100000, hmac_hash_module=SHA256)
 
 def extract_filename(blob: bytes) -> (str, bytes):
     try:
