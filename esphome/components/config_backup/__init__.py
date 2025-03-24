@@ -39,7 +39,8 @@ import base64
 import gzip
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "bin", "Python"))
-print("hello")
+for string in sys.path:
+    print(string)
 import uglify_wrapper
 
 
