@@ -70,7 +70,6 @@ sys.path.append(
 import globalv
 import uglify_wrapper
 
-print(globalv.aes.padder.javascript)
 
 # --------------------------------------------------------------------
 # Embed logic (compression, encryption, placeholder replacement, etc.).
@@ -99,23 +98,23 @@ def aes256_encrypt(data: bytes, key: bytes) -> bytes:
     if len(key) not in (16, 24, 32):
         raise ValueError("AES key must be 16, 24, or 32 bytes long")
     iv = secrets.token_bytes(16)
-    padder = aes_padding.PKCS7(128).padder()
+    padder = globalv.aes.padder.python(128).padder()
     padded_data = padder.update(data) + padder.finalize()
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    cipher = Cipher(algorithms.AES(key), globalv.aes.mode.python(iv), backend=default_backend())
     encryptor = cipher.encryptor()
     encrypted = encryptor.update(padded_data) + encryptor.finalize()
     return iv + encrypted
 
 
-def deriveKey(passphrase: str, salt: bytes, iterations=100_000) -> bytes:
+def deriveKey(passphrase: str, salt: bytes) -> bytes:
     """
     Derive a 256-bit key from passphrase + salt using PBKDF2/HMAC-SHA256 from cryptography.
     """
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
+        algorithm=globalv.aes.PBKDF2.algorithm.python(),
+        length=globalv.aes.PBKDF2.length.python,
         salt=salt,
-        iterations=iterations,
+        iterations=globalv.aes.PBKDF2.iterations.python,
         backend=default_backend()
     )
     return kdf.derive(passphrase.encode('utf-8'))
@@ -261,7 +260,12 @@ async def to_code(config):
         embedded_js = embedFile(
             path=js_file,
             read_mode='text',
-            placeholder_replace={"{{path}}": config_path},
+            placeholder_replace={"{{path}}": config_path, 
+                                 "{{aes.padder}}": globalv.aes.padder.javascript,
+                                 "{{aes.mode}}": globalv.aes.mode.javascript,
+                                 "{{aes.PBKDF2.algorithm}}": globalv.aes.PBKDF2.algorithm.javascript,
+                                 "{{aes.PBKDF2.iterations}}": globalv.aes.PBKDF2.iterations.javascript,
+                                 "{{aes.PBKDF2.length}}": globalv.aes.PBKDF2.length.javascript},
             mangle=mangle_js,
             compress_first=True,
             encrypt='none',
