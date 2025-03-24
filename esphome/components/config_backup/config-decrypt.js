@@ -75,9 +75,9 @@ function aes256DecryptToBase64(base64Data, password) {
 
   // Derive AES key via PBKDF2
   const key = CryptoJS.PBKDF2(password, salt, {
-    keySize: 256 / 32,
-    iterations: 100000,
-    hasher: CryptoJS.algo.SHA256
+    keySize: 256 / {{aes.PBKDF2.length}},
+    iterations: {{aes.PBKDF2.iterations}},
+    hasher: {{aes.PBKDF2.algorithm}}
   });
 
   // Decrypt using AES-256 CBC
@@ -85,8 +85,8 @@ function aes256DecryptToBase64(base64Data, password) {
     ciphertext: ciphertext
   }, key, {
     iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7
+    mode: {{aes.mode}},
+    padding: {{aes.padder}}
   });
 
   return CryptoJS.enc.Base64.stringify(decrypted);
@@ -157,17 +157,17 @@ function aes256Decrypt(base64Data, password) {
   const ciphertext = CryptoJS.lib.WordArray.create(data.words.slice(8));
 
   const key = CryptoJS.PBKDF2(password, salt, {
-    keySize: 256 / 32,
-    iterations: 100000,
-    hasher: CryptoJS.algo.SHA256
+    keySize: 256 / {{aes.PBKDF2.length}},
+    iterations: {{aes.PBKDF2.iterations}},
+    hasher: {{aes.PBKDF2.algorithm}}
   });
 
   const decrypted = CryptoJS.AES.decrypt({
     ciphertext: ciphertext
   }, key, {
     iv: iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7
+    mode: {{aes.mode}},
+    padding: {{aes.padder}}
   });
 
   return CryptoJS.enc.Utf8.stringify(decrypted);
