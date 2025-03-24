@@ -22,6 +22,6 @@ config_backup:
   encryption: aes256 #Encryption types for config payload accepts: none,xor,aes256 (default: none)
   key: mysecretkey #Secret for encryption/encoding
   # debug: print.b64 #Print messages for debugging accepts: print.b64,print.*,*
-  # gui: True #Display the gui widget for decrypting on the web interface (default: True) !!Important Injects after ota: element right now, so won't work without ota
+  # gui: True #Display the gui widget for decrypting on the web interface (default: True) !!Important Injects after ota: element right now, so won't work without ota (is this just default now!?)
   # compress: True #Compress the config (prior to encrypting/encoding) (default: True)
   # config_path: /config.b64 #HTTP Path for the config blob (default: /config.b64)
