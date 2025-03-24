@@ -4,5 +4,6 @@ esphome/components/config_backup/__pycache__/
 esphome/components/config_backup/build.py
 esphome/components/config_backup/config-decrypt.h
 bin/Python/__pycache__/
+secrets.yaml
 *.log
 *.zip
