@@ -133,9 +133,7 @@ def embedFile(
     if placeholder_replace:
         text_str = data.decode('utf-8')
         for old, new in placeholder_replace.items():
-            logger.info(f"Replacing {old} with {new}...")
             text_str = text_str.replace(old, new)
-        logger.info(text_str)
         data = text_str.encode('utf-8')
 
     if mangle:
