@@ -1,6 +1,5 @@
 {
-    "parse":
-    {
+    "parse": {
         "bare_returns": false,
         "expression": false,
         "filename": null,
@@ -10,8 +9,7 @@
         "strict": false,
         "toplevel": null
     },
-    "compress":
-    {
+    "compress": {
         "annotations": true,
         "arguments": true,
         "arrows": true,
@@ -76,8 +74,7 @@
         "webkit": false,
         "yields": true
     },
-    "mangle":
-    {
+    "mangle": {
         "eval": false,
         "ie": false,
         "keep_fargs": false,
@@ -88,8 +85,7 @@
         "v8": false,
         "webkit": false
     },
-    "output":
-    {
+    "output": {
         "annotations": false,
         "ascii_only": false,
         "beautify": false,
