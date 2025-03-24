@@ -13,11 +13,6 @@ from esphome.components.web_server_base import CONF_WEB_SERVER_BASE_ID
 from esphome.const import CONF_ID
 from esphome.core import CORE, coroutine_with_priority
 
-# We now switch fully to the "cryptography" library for AES:
-from cryptography.hazmat.primitives import padding as aes_padding
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
-
 # --------------------------------------------------------------------
 # Setup Python logging
 # --------------------------------------------------------------------
@@ -81,6 +76,12 @@ import uglify_wrapper
 import gzip
 import hashlib
 from cryptography.fernet import Fernet
+# We now switch fully to the "cryptography" library for AES:
+from cryptography.hazmat.primitives import padding as aes_padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
 def xor_encrypt(data: bytes, key: bytes) -> bytes:
@@ -104,9 +105,18 @@ def aes256_encrypt(data: bytes, key: bytes) -> bytes:
     return iv + encrypted
 
 
-def deriveKey(passphrase: str, salt: bytes, iterations=100000) -> bytes:
-    """Derive a 256-bit key from passphrase + salt using PBKDF2/HMAC-SHA256."""
-    return hashlib.pbkdf2_hmac('sha256', passphrase.encode('utf-8'), salt, iterations)
+def deriveKey(passphrase: str, salt: bytes, iterations=100_000) -> bytes:
+    """
+    Derive a 256-bit key from passphrase + salt using PBKDF2/HMAC-SHA256 from cryptography.
+    """
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=iterations,
+        backend=default_backend()
+    )
+    return kdf.derive(passphrase.encode('utf-8'))
 
 
 def embedFile(
@@ -281,13 +291,7 @@ async def to_code(config):
     # For debugging, if the user wants to see the final base64, we can only warn because
     # it is double-compressed.
     if debug in ("print.b64", "print.*", "*"):
-        logger.warning("The final config is compressed again, so direct b64 output may differ.")
-        try:
-            decompressed_b64 = gzip.decompress(embedded_yaml)
-            base64_str = decompressed_b64.decode('utf-8', errors='ignore')
-            logger.info(f"Actual base64 of config: {base64_str}")
-        except Exception as e:
-            logger.warning(f"Could not decompress final data to display base64: {e}")
+        logger.info(f"Config: {base64.b64encode(embedded_yaml)}")
 
     # Convert final YAML data to a C++ array.
     yaml_c_array = to_c_array(embedded_yaml, "CONFIG_B64")
