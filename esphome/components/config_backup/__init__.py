@@ -264,7 +264,7 @@ async def to_code(config):
                     INDEX_HTML_KEY = INDEX_HTML_KEY.split('[')
                     INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')[1]
                     print(INDEX_HTML)
-                    print('[174]'.join(INDEX_HTML_KEY))
+                    print(f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY))
                 # CORE.global_statements.remove(expression)
 
     # Define C preprocessor macro for config path
