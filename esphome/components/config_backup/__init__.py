@@ -263,6 +263,8 @@ async def to_code(config):
     config_path = config.get(CONF_CONFIG_PATH)
     javascript_location = config.get(CONF_JAVASCRIPT)
 
+    INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE = None
+
     for expression in CORE.global_statements:
         if type(expression.expression) == cg.RawExpression:
             if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression.text:
@@ -298,6 +300,7 @@ async def to_code(config):
                     value = expression.expression.text
                     INDEX_HTML_SIZE = value.split('=')[0]
                 CORE.global_statements.remove(expression)
+
     if not None in (INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE):
         final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
         final_size = len(INDEX_HTML)
