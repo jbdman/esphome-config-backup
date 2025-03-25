@@ -339,8 +339,7 @@ async def to_code(config):
             embedded_js = embedFile(
                 path=js_file,
                 read_mode='text',
-                placeholder_replace={"{{path}}": config_path, 
-                                     "{{aes.padder}}": globalv.aes.padder.javascript,
+                placeholder_replace={"{{aes.padder}}": globalv.aes.padder.javascript,
                                      "{{aes.mode}}": globalv.aes.mode.javascript,
                                      "{{aes.PBKDF2.algorithm}}": globalv.aes.PBKDF2.algorithm.javascript,
                                      "{{aes.PBKDF2.iterations}}": globalv.aes.PBKDF2.iterations.javascript,
