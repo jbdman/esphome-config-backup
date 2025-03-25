@@ -289,9 +289,15 @@ async def to_code(config):
                             try:
                                 commit_tag = git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty'], ROOT_COMPONENT_PATH)
                             except:
+                                logger.warning("Failed to extract git commit tag")
                                 commit_tag = "main"
+                            try:
+                                user_repo = git.run_git_command(['git', 'remote', 'get-url', 'origin'], ROOT_COMPONENT_PATH).replace("https://github.com/","").replace(".git","")
+                            except:
+                                logger.warning("Failed to extract git user and repo name")
+                                user_repo = "jbdman/esphome-config-backup"
                             
-                            config_decrypt_js = f"https://cdn.jsdelivr.net/gh/jbdman/esphome-config-backup@{commit_tag}/esphome/components/config_backup/config-decrypt.js"
+                            config_decrypt_js = f"https://cdn.jsdelivr.net/gh/{user_repo}@{commit_tag}/esphome/components/config_backup/config-decrypt.js"
     
                         # Script tags to be injected
                         script_tag = (
