@@ -316,7 +316,7 @@ async def to_code(config):
                                 key=key,
                                 final_base64=True,
                                 compress_after_b64=False
-                            ).encode("utf-8"))
+                            ).decode("utf-8"))
         except Exception as e:
             logger.warning(f"Could not create examples: {e}")
     # Convert final YAML data to a C++ array.
