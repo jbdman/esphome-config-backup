@@ -258,13 +258,12 @@ async def to_code(config):
             if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression.text:
                 if "uint8_t" in expression.expression.text:
                     value = expression.expression.text
-                    value = value.split("{")[1]
+                    [INDEX_HTML_KEY, value] = value.split("{")
                     value = value.split("}")[0]
                     INDEX_HTML = from_int_list_string(value).decode("utf-8")
+                    print(INDEX_HTML)
+                    print(INDEX_HTML_KEY)
                 # CORE.global_statements.remove(expression)
-
-    for expression in CORE.global_statements:
-        print(expression)
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
