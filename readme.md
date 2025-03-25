@@ -145,7 +145,7 @@ If `-o` is used without a filename, and the embedded config contains a filename,
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [GNU GPLv3](LICENSE).
 
 ---
 
