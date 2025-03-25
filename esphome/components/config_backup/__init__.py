@@ -280,6 +280,8 @@ async def to_code(config):
 
                     print(INDEX_HTML)
 
+                    print(git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty']))
+
                     final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
                     final_expression = (f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
                 # CORE.global_statements.remove(expression)
