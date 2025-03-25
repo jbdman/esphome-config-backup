@@ -20,6 +20,7 @@ config_backup:
   key: !secret config_backup_key #Secret for encryption/encoding
   # debug: examples.create #Print messages for debugging accepts: print.b64,print.*,*,examples.create (default: )
   # gui: True #Display the gui widget for decrypting on the web interface (default: True) !!Important Injects after ota: element right now, so won't work without ota (is this just default now!?)
+  # javascript_location: remote #Whether to use the javascript file from github through jsdelivr cdn, or embed in esp firmware, and host locally accepts: remote,local (default: remote)
   # compress: True #Compress the config (prior to encrypting/encoding) (default: True)
   # config_path: /config.b64 #HTTP Path for the config blob (default: /config.b64)
 
