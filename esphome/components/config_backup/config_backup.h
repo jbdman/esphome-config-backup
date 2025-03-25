@@ -10,13 +10,7 @@
 #include "esphome/core/defines.h"
 #include "esphome/components/web_server_base/web_server_base.h"
 
-#ifdef ESPHOME_CONFIG_BACKUP_GUI
-  /**
-   * @brief HTML page content for the ESPHome web server interface.
-   */
-  extern const uint8_t ESPHOME_WEBSERVER_INDEX_HTML[];
-  extern const size_t ESPHOME_WEBSERVER_INDEX_HTML_SIZE;
-
+#ifndef ESPHOME_CONFIG_BACKUP_NOJS
   /**
    * @brief JavaScript (GZipped) used to handle client-side decryption of configuration data.
    */
@@ -35,53 +29,6 @@ namespace config_backup {
 
 using namespace web_server_base;
 
-#ifdef ESPHOME_CONFIG_BACKUP_GUI
-/**
- * @class InjectMiddlewareHandler
- * @brief Middleware that modifies the response for "/" by injecting a script tag before sending.
- *        This script tag references `crypto-js` and the custom `config-decrypt.js`.
- */
-class InjectMiddlewareHandler : public AsyncWebHandler {
- public:
-  /**
-   * @brief Determines if this handler can manage the incoming request.
-   * @param request The incoming request object.
-   * @return True if the URL is "/", and the method is GET.
-   */
-  bool canHandle(AsyncWebServerRequest *request) override {
-    return request->url() == "/" && request->method() == HTTP_GET;
-  }
-
-  /**
-   * @brief Reads the index.html from program memory, injects script tags, and returns the result.
-   * @param request The request to be served.
-   */
-  void handleRequest(AsyncWebServerRequest *request) override {
-    // Copy the PROGMEM HTML content into RAM
-    std::string html(reinterpret_cast<const char *>(ESPHOME_WEBSERVER_INDEX_HTML),
-                     ESPHOME_WEBSERVER_INDEX_HTML_SIZE);
-
-    // Script tags to be injected
-    std::string script_tag = "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\"></script>\n"
-                             "<script src=\"/config-decrypt.js\"></script>\n";
-
-    // Find where to inject the script tags
-    size_t insert_pos = html.find("</body>");
-    if (insert_pos != std::string::npos) {
-      html.insert(insert_pos, script_tag);
-    }
-
-    // Send the modified HTML as a normal response
-    request->send(200, "text/html", html.c_str());
-  }
-
-  /**
-   * @brief Marks this handler as non-trivial for the web server.
-   * @return False always.
-   */
-  bool isRequestHandlerTrivial() override { return false; }
-};
-#endif  // ESPHOME_CONFIG_BACKUP_GUI
 
 /**
  * @class ConfigBackup
@@ -95,10 +42,6 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
    */
   explicit ConfigBackup(WebServerBase *base) : base_(base) {
     if (this->base_ != nullptr) {
-      // Order matters: inject the middleware first, then this handler
-      #ifdef ESPHOME_CONFIG_BACKUP_GUI
-        this->base_->add_handler(new InjectMiddlewareHandler());
-      #endif
       this->base_->add_handler(this);
     }
   }
@@ -130,7 +73,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   bool canHandle(AsyncWebServerRequest *request) override {
     return (
       request->url() == ESPHOME_CONFIG_BACKUP_CONFIG_PATH
-      #ifdef ESPHOME_CONFIG_BACKUP_GUI
+      #ifndef ESPHOME_CONFIG_BACKUP_NOJS
         || request->url() == "/config-decrypt.js"
       #endif
     ) && request->method() == HTTP_GET;
@@ -160,7 +103,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
       request->send(response);
     }
 
-    #ifdef ESPHOME_CONFIG_BACKUP_GUI
+    #ifndef ESPHOME_CONFIG_BACKUP_NOJS
     // Serve the decryption script
     else if (request->url() == "/config-decrypt.js") {
       AsyncWebServerResponse *response = request->beginResponse_P(
