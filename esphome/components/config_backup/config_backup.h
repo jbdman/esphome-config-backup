@@ -65,6 +65,14 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   }
 
   /**
+   * @brief Sets the compression type (if any) used to secure the config backup.
+   * @param compression String describing the compression method.
+   */
+  void set_compression(String compression) {
+    this->compression = compression;
+  }
+
+  /**
    * @brief Determines if this handler can manage the incoming request for the config data
    *        (or the decryption script if GUI support is enabled).
    * @param request The incoming request object.
@@ -127,6 +135,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
  protected:
   WebServerBase *base_;  ///< Pointer to the main web server base.
   String encryption;      ///< Encryption method used for the config data.
+  String compression;
 };
 
 }  // namespace config_backup
