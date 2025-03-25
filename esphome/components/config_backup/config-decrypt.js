@@ -1,3 +1,4 @@
+//dummy comment
 (function () {
   'use strict';
 
