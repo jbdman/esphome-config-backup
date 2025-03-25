@@ -324,7 +324,7 @@
       srcElement.parentElement.querySelector('#decrypt-output').textContent = '';
 
       try {
-        const response = await fetch('{{path}}');
+        const response = await fetch(CONF_PATH);
         const encryption = response.headers.get('X-Encryption-Type');
         const compress = response.headers.get('X-Compression-Type');
         const b64 = await response.text();
