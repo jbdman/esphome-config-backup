@@ -263,95 +263,94 @@ async def to_code(config):
     config_path = config.get(CONF_CONFIG_PATH)
     javascript_location = config.get(CONF_JAVASCRIPT)
 
-    INDEX_HTML = INDEX_HTML_KEY = INDEX_HTML_SIZE = None
-
-    to_remove = []
-    for expression in CORE.global_statements:
-        if type(expression.expression) == cg.RawExpression:
-            print(expression.expression.text)
-            if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression.text:
-                if "uint8_t" in expression.expression.text:
-                    value = expression.expression.text
-                    [INDEX_HTML_KEY, value] = value.split("{")
-                    value = value.split("}")[0]
-                    INDEX_HTML = from_int_list_string(value).decode("utf-8")
-                    INDEX_HTML_KEY = INDEX_HTML_KEY.split('[')
-                    INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')[1]
-
-                    config_decrypt_js = "/config-decrypt.js"
-                    if javascript_location == "remote":
-                        cg.add_define("ESPHOME_CONFIG_BACKUP_NOJS")
-                        try:
-                            commit_tag = git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty'], ROOT_COMPONENT_PATH)
-                        except:
-                            commit_tag = "main"
-                        
-                        config_decrypt_js = f"https://cnd.jsdelivr.net/gh/jbdman/esphome-config-backup@{commit_tag}/esphome/components/config_backup/config-decrypt.js"
-
-                    # Script tags to be injected
-                    script_tag = (
-                        '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>'
-                        f'<script src="{config_decrypt_js}"></script>'
-                    )
-                    
-                    # Find where to inject the script tags
-                    insert_pos = INDEX_HTML.find("</body>")
-                    if insert_pos != -1:
-                        INDEX_HTML = INDEX_HTML[:insert_pos] + script_tag + INDEX_HTML[insert_pos:]
-                else:
-                    logger.info("This code is reached!")
-                    value = expression.expression.text
-                    INDEX_HTML_SIZE = value.split('=')[0]
-                to_remove.append(expression)
-
-    for expression in to_remove:
-        CORE.global_statements.remove(expression)
-
-    if not None in (INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE):
-        final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
-        final_size = len(INDEX_HTML)
-        final_expression = (f'[{final_size}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
-        final_size_expression = INDEX_HTML_SIZE + f"= {final_size}"
-        cg.add_global(cg.RawExpression(final_expression))
-        cg.add_global(cg.RawExpression(final_size_expression))
-    else:
-        logger.warning(f"INDEX_HTML: {INDEX_HTML}\nINDEX_HTML_KEY: {INDEX_HTML_KEY}\nINDEX_HTML_SIZE: {INDEX_HTML_SIZE}")
-        raise Exception("Missing value from parsing INDEX_HTML. Please report this.")
-
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
 
-    # If GUI is enabled, embed the minified JavaScript for client-side config decryption.
+    # If GUI is enabled, inject index.html, and embed the minified JavaScript for client-side config decryption.
     if gui:
-        js_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
+        INDEX_HTML = INDEX_HTML_KEY = INDEX_HTML_SIZE = None
 
-        def mangle_js(input_bytes: bytes) -> bytes:
-            js_str = input_bytes.decode('utf-8')
-            return uglify_wrapper.minify_js(js_str).encode('utf-8')
+        to_remove = []
+        for expression in CORE.global_statements:
+            if type(expression.expression) == cg.RawExpression:
+                if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression.text:
+                    if "uint8_t" in expression.expression.text:
+                        value = expression.expression.text
+                        [INDEX_HTML_KEY, value] = value.split("{")
+                        value = value.split("}")[0]
+                        INDEX_HTML = from_int_list_string(value).decode("utf-8")
+                        INDEX_HTML_KEY = INDEX_HTML_KEY.split('[')
+                        INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')[1]
+    
+                        config_decrypt_js = "/config-decrypt.js"
+                        if javascript_location == "remote":
+                            cg.add_define("ESPHOME_CONFIG_BACKUP_NOJS")
+                            try:
+                                commit_tag = git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty'], ROOT_COMPONENT_PATH)
+                            except:
+                                commit_tag = "main"
+                            
+                            config_decrypt_js = f"https://cnd.jsdelivr.net/gh/jbdman/esphome-config-backup@{commit_tag}/esphome/components/config_backup/config-decrypt.js"
+    
+                        # Script tags to be injected
+                        script_tag = (
+                            '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>'
+                            f'<script src="{config_decrypt_js}"></script>'
+                        )
+                        
+                        # Find where to inject the script tags
+                        insert_pos = INDEX_HTML.find("</body>")
+                        if insert_pos != -1:
+                            INDEX_HTML = INDEX_HTML[:insert_pos] + script_tag + INDEX_HTML[insert_pos:]
+                    else:
+                        value = expression.expression.text
+                        INDEX_HTML_SIZE = value.split('=')[0]
+                    to_remove.append(expression)
+    
+        for expression in to_remove:
+            CORE.global_statements.remove(expression)
+    
+        if not None in (INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE):
+            final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
+            final_size = len(INDEX_HTML)
+            final_expression = (f'[{final_size}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
+            final_size_expression = INDEX_HTML_SIZE + f"= {final_size}"
+            cg.add_global(cg.RawExpression(final_expression))
+            cg.add_global(cg.RawExpression(final_size_expression))
+        else:
+            logger.warning(f"INDEX_HTML: {INDEX_HTML}\nINDEX_HTML_KEY: {INDEX_HTML_KEY}\nINDEX_HTML_SIZE: {INDEX_HTML_SIZE}")
+            raise Exception("Missing value from parsing INDEX_HTML. Please report this.")
 
-        embedded_js = embedFile(
-            path=js_file,
-            read_mode='text',
-            placeholder_replace={"{{path}}": config_path, 
-                                 "{{aes.padder}}": globalv.aes.padder.javascript,
-                                 "{{aes.mode}}": globalv.aes.mode.javascript,
-                                 "{{aes.PBKDF2.algorithm}}": globalv.aes.PBKDF2.algorithm.javascript,
-                                 "{{aes.PBKDF2.iterations}}": globalv.aes.PBKDF2.iterations.javascript,
-                                 "{{aes.PBKDF2.length}}": globalv.aes.PBKDF2.length.javascript},
-            mangle=mangle_js,
-            compress_first=True,
-            encrypt='none',
-            key=None,
-            final_base64=False,
-            compress_after_b64=False,
-            add_filename_comment=False
-        )
-        # Convert to C++ array
-        js_c_array = to_c_array(embedded_js, "CONFIG_DECRYPT_JS")
-        lines = js_c_array.split("\n")
-        cg.add_global(cg.RawExpression(lines[0]))
-        cg.add_global(cg.RawExpression(lines[1]))
+        if javascript_location == "local":
+            js_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
+
+            def mangle_js(input_bytes: bytes) -> bytes:
+                js_str = input_bytes.decode('utf-8')
+                return uglify_wrapper.minify_js(js_str).encode('utf-8')
+    
+            embedded_js = embedFile(
+                path=js_file,
+                read_mode='text',
+                placeholder_replace={"{{path}}": config_path, 
+                                     "{{aes.padder}}": globalv.aes.padder.javascript,
+                                     "{{aes.mode}}": globalv.aes.mode.javascript,
+                                     "{{aes.PBKDF2.algorithm}}": globalv.aes.PBKDF2.algorithm.javascript,
+                                     "{{aes.PBKDF2.iterations}}": globalv.aes.PBKDF2.iterations.javascript,
+                                     "{{aes.PBKDF2.length}}": globalv.aes.PBKDF2.length.javascript},
+                mangle=mangle_js,
+                compress_first=True,
+                encrypt='none',
+                key=None,
+                final_base64=False,
+                compress_after_b64=False,
+                add_filename_comment=False
+            )
+            # Convert to C++ array
+            js_c_array = to_c_array(embedded_js, "CONFIG_DECRYPT_JS")
+            lines = js_c_array.split("\n")
+            cg.add_global(cg.RawExpression(lines[0]))
+            cg.add_global(cg.RawExpression(lines[1]))
         cg.add_define("ESPHOME_CONFIG_BACKUP_GUI")
 
     # Embed the main YAML.
