@@ -297,6 +297,7 @@ async def to_code(config):
                     if insert_pos != -1:
                         INDEX_HTML = INDEX_HTML[:insert_pos] + script_tag + INDEX_HTML[insert_pos:]
                 else:
+                    logger.info("This code is reached!")
                     value = expression.expression.text
                     INDEX_HTML_SIZE = value.split('=')[0]
                 CORE.global_statements.remove(expression)
