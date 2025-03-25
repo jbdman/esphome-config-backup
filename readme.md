@@ -1,13 +1,13 @@
 # ESPHome Config Backup Component
 
-This project provides a custom ESPHome component for backing up a device's active configuration. It allows encrypted export of the config via a web interface, supporting AES256 and XOR encryption.
+This project provides a custom ESPHome component for backing up a device's active configuration. It embeds the encoded, compressed, and encrypted yaml config in the embedded firmware. It allows export of the config via a web interface, supporting AES256 encryption, XOR, and plaintext.
 
 ## 🧩 Features
 
-- Backup ESPHome device configuration at runtime
+- Backup ESPHome device configuration at compile time
 - Encrypt configuration backups using AES256 or XOR
-- Serve config data through a simple web interface
-- Optional GUI widget for in-browser config download
+- Serve config data through an endpoint on the integrated web_server
+- Optional GUI widget for in-browser config decryption and download
 - External component for easy integration
 
 ---
@@ -64,14 +64,14 @@ config_backup:
 The config data can be encrypted before transmission:
 
 - `none`: No encryption (plaintext)
-- `xor`: Basic XOR-based obfuscation using a key
-- `aes256`: Secure encryption using AES-256 with a shared secret key
+- `xor`: Basic XOR-based obfuscation using a password
+- `aes256`: Secure encryption using AES-256 with a password used to derive a key (default)
 
 ---
 
 ## 🧪 Decoder Scripts
 
-To decrypt the exported config files, use one of the included decoder tools in the `bin/` directory.
+To decrypt the exported config files, use one of the included decoder tools in the `bin/` directory, or try the web gui component (enabled by default).
 
 ### 🔧 Decoder Tools:
 
