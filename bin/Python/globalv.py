@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.ciphers import modes
 
 aes = sn(
 	padder=sn(
-		python=apadding.PKCS7,
+		python=padding.PKCS7,
 		javascript="CryptoJS.pad.Pkcs7"
 	),
 	mode=sn(
