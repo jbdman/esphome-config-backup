@@ -246,7 +246,12 @@ async def to_code(config):
     for expression in CORE.global_statements:
         if type(expression.expression) == cg.RawExpression:
             if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression.text:
-                print(expression)
+                if "uint8_t" in expression.expression.text:
+                    # Save index
+                CORE.global_statements.delete(expression)
+
+    for expression in CORE.global_statements:
+        print(expression)
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
