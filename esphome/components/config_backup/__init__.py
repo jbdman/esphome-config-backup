@@ -270,10 +270,6 @@ async def to_code(config):
     config_path = config.get(CONF_CONFIG_PATH)
     javascript_location = config.get(CONF_JAVASCRIPT)
 
-
-    # Define C preprocessor macro for config path
-    cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
-
     # If GUI is enabled, inject index.html
     if gui:
         INDEX_HTML = INDEX_HTML_KEY = INDEX_HTML_SIZE = None
@@ -430,9 +426,6 @@ async def to_code(config):
         logger.info("Embedded config without encryption")
     else:
         logger.info(f"Encrypted and embedded config using {encryption.upper()}")
-
-    if do_compress:
-        cg.add_define("ESPHOME_CONFIG_BACKUP_COMPRESS")
 
     # Create the component instance
     server = await cg.get_variable(config[CONF_WEB_SERVER_BASE_ID])
