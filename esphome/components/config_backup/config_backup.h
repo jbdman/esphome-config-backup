@@ -65,11 +65,19 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   }
 
   /**
-   * @brief Sets the compression type (if any) used to secure the config backup.
+   * @brief Sets the compression type (if any) used to compress the config backup.
    * @param compression String describing the compression method.
    */
   void set_compression(String compression) {
     this->compression = compression;
+  }
+
+  /**
+   * @brief Sets the config_path used to serve the config backup.
+   * @param config_path String describing the config_path.
+   */
+  void set_config_path(String config_path) {
+    this->config_path = config_path;
   }
 
   /**
@@ -80,7 +88,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
    */
   bool canHandle(AsyncWebServerRequest *request) override {
     return (
-      request->url() == ESPHOME_CONFIG_BACKUP_CONFIG_PATH
+      request->url() == this->config_path
       #ifndef ESPHOME_CONFIG_BACKUP_NOJS
         || request->url() == "/config-decrypt.js"
       #endif
@@ -104,10 +112,8 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
       // Include encryption metadata
       response->addHeader("X-Encryption-Type", this->encryption);
 
-      //TODO: Change this to a string variable, this is frankly gross
-      #ifdef ESPHOME_CONFIG_BACKUP_COMPRESS
-        response->addHeader("X-Compression-Type", "gzip");
-      #endif
+      // Include compression metadata
+      response->addHeader("X-Compression-Type", this->compression);
 
       request->send(response);
     }
@@ -136,6 +142,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
   WebServerBase *base_;  ///< Pointer to the main web server base.
   String encryption;      ///< Encryption method used for the config data.
   String compression;
+  String config_path;
 };
 
 }  // namespace config_backup
