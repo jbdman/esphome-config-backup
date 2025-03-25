@@ -267,8 +267,21 @@ async def to_code(config):
                     INDEX_HTML_KEY = INDEX_HTML_KEY.split('[')
                     INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')[1]
                     print(INDEX_HTML)
+                    # Script tags to be injected
+                    script_tag = (
+                        '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>\n'
+                        '<script src="/config-decrypt.js"></script>\n'
+                    )
+                    
+                    # Find where to inject the script tags
+                    insert_pos = INDEX_HTML.find("</body>")
+                    if insert_pos != -1:
+                        INDEX_HTML = INDEX_HTML[:insert_pos] + script_tag + INDEX_HTML[insert_pos:]
+
+                    print(INDEX_HTML)
+
                     final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
-                    print((f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY)).strip() + f"{{{final_int_string}}};")
+                    final_expression = (f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
                 # CORE.global_statements.remove(expression)
 
     # Define C preprocessor macro for config path
