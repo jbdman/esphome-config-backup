@@ -248,7 +248,7 @@ async def to_code(config):
             if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression.text:
                 if "uint8_t" in expression.expression.text:
                     print()
-                CORE.global_statements.delete(expression)
+                CORE.global_statements.remove(expression)
 
     for expression in CORE.global_statements:
         print(expression)
