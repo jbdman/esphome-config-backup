@@ -245,7 +245,7 @@ async def to_code(config):
 
     for expression in CORE.global_statements:
         if type(expression.expression) == cg.RawExpression:
-            print(expression)
+            print(expression.expression.text)
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
