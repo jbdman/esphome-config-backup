@@ -1,14 +1,12 @@
 from types import SimpleNamespace as sn
 
-from cryptography.hazmat.primitives import padding as aes_padding
-from cryptography.hazmat.primitives.ciphers import modes #Cipher, algorithms, 
-#from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-#from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import padding, hashes
+from cryptography.hazmat.primitives.ciphers import modes
+
 
 aes = sn(
 	padder=sn(
-		python=aes_padding.PKCS7,
+		python=apadding.PKCS7,
 		javascript="CryptoJS.pad.Pkcs7"
 	),
 	mode=sn(
