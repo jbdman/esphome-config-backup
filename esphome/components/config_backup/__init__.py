@@ -225,19 +225,20 @@ CONF_KEY = "key"
 CONF_ENCRYPTION = "encryption"
 CONF_DEBUG = "debug"
 CONF_GUI = "gui"
-CONF_COMPRESS = "compress"
+CONF_COMPRESS = "compression"
 CONF_CONFIG_PATH = "config_path"
 CONF_JAVASCRIPT = "javascript_location"
 
 ENCRYPTION_TYPES = ["none", "xor", "aes256"]
 JAVASCRIPT_LOCATIONS = ["remote", "local"]
+COMPRESSION_TYPES = ["none", "gzip"]
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(ConfigBackup),
     cv.GenerateID(CONF_WEB_SERVER_BASE_ID): cv.use_id(web_server_base.WebServerBase),
     cv.Optional(CONF_ENCRYPTION, default="none"): cv.one_of(*ENCRYPTION_TYPES, lower=True),
     cv.Optional(CONF_GUI, default=True): cv.boolean,
-    cv.Optional(CONF_COMPRESS, default=True): cv.boolean,
+    cv.Optional(CONF_COMPRESS, default="gzip"): cv.one_of(*COMPRESSION_TYPES),
     cv.Optional(CONF_JAVASCRIPT, default="remote"): cv.one_of(*JAVASCRIPT_LOCATIONS),
     cv.Optional(CONF_KEY): cv.string,
     cv.Optional(CONF_DEBUG): cv.string,
@@ -259,7 +260,13 @@ async def to_code(config):
     key = config.get(CONF_KEY)
     debug = config.get(CONF_DEBUG)
     gui = config.get(CONF_GUI)
-    do_compress = config.get(CONF_COMPRESS)
+    compression_type = config.get(CONF_COMPRESS)
+
+    if compression_type == "gzip":
+        do_compress = True
+    else:
+        do_compress = False
+
     config_path = config.get(CONF_CONFIG_PATH)
     javascript_location = config.get(CONF_JAVASCRIPT)
 
@@ -420,5 +427,6 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID], server)
     await cg.register_component(var, config)
 
-    # If your C++ class needs to know the encryption method.
+    # If your C++ class needs to know the encryption method and compression type.
     cg.add(var.set_encryption(encryption))
+    cg.add(var.set_compression(compression_type))
