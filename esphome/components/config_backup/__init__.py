@@ -247,7 +247,7 @@ async def to_code(config):
         if type(expression.expression) == cg.RawExpression:
             if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression.text:
                 if "uint8_t" in expression.expression.text:
-                    # Save index
+                    print()
                 CORE.global_statements.delete(expression)
 
     for expression in CORE.global_statements:
