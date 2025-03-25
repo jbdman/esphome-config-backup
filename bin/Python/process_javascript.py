@@ -2,6 +2,8 @@ import os
 import globalv
 import uglify_wrapper
 
+## This script is called via pre-commit git hooks, to update the cdn js file if necessary
+
 repository_root = os.path.join(os.path.dirname(__file__), "..", "..")
 javascript_file = os.path.join(repository_root, "esphome/components/config_backup/config-decrypt.js")
 output_path = os.path.join(repository_root, "cdn/config-decrypt.js")
