@@ -244,7 +244,7 @@ async def to_code(config):
     config_path = config.get(CONF_CONFIG_PATH)
 
     for expression in CORE.global_statements:
-        print(expression.expression.__contains__("ESPHOME_WEBSERVER_INDEX_HTML"))
+        print(expression.expression)
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
