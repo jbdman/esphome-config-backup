@@ -274,7 +274,7 @@ async def to_code(config):
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
 
-    # If GUI is enabled, inject index.html, and embed the minified JavaScript for client-side config decryption.
+    # If GUI is enabled, inject index.html
     if gui:
         INDEX_HTML = INDEX_HTML_KEY = INDEX_HTML_SIZE = None
 
@@ -321,20 +321,33 @@ async def to_code(config):
                         value = expression.expression.text
                         INDEX_HTML_SIZE = value.split('=')[0]
                     to_remove.append(expression)
-    
-        for expression in to_remove:
-            CORE.global_statements.remove(expression)
-    
+
+        # Check to make sure we got what we need from the above, otherwise throw an error
         if not None in (INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE):
+            # Create the new expressions
             final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
             final_size = len(INDEX_HTML)
             final_expression = (f'[{final_size}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
             final_size_expression = INDEX_HTML_SIZE + f"= {final_size}"
+
+            # Remove the designated expressions from the global list
+            for expression in to_remove:
+                CORE.global_statements.remove(expression)
+
+            # Add the new ones
             cg.add_global(cg.RawExpression(final_expression))
             cg.add_global(cg.RawExpression(final_size_expression))
         else:
+            # Log the states
             logger.warning(f"INDEX_HTML: {INDEX_HTML}\nINDEX_HTML_KEY: {INDEX_HTML_KEY}\nINDEX_HTML_SIZE: {INDEX_HTML_SIZE}")
-            raise Exception("Missing value from parsing INDEX_HTML. Please report this.")
+            # Grab the GH user
+            try:
+                user_repo = git.run_git_command(['git', 'remote', 'get-url', 'origin'], ROOT_COMPONENT_PATH).replace("https://github.com/","").replace(".git","")
+            except:
+                logger.warning("Failed to extract git user and repo name")
+                user_repo = "jbdman/esphome-config-backup"
+            # Raise the exception
+            raise Exception(f"Missing value from parsing INDEX_HTML. Please report this to @{user_repo.split('/')[0]} on github.")
 
         if javascript_location == "local":
             js_file = os.path.join(os.path.dirname(__file__), "config-decrypt.js")
@@ -364,7 +377,6 @@ async def to_code(config):
             lines = js_c_array.split("\n")
             cg.add_global(cg.RawExpression(lines[0]))
             cg.add_global(cg.RawExpression(lines[1]))
-        cg.add_define("ESPHOME_CONFIG_BACKUP_GUI")
 
     # Embed the main YAML.
     yaml_file = CORE.config_path
@@ -427,6 +439,7 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID], server)
     await cg.register_component(var, config)
 
-    # If your C++ class needs to know the encryption method and compression type.
+    # C++ class needs to know the encryption method, compression type, and config_path
     cg.add(var.set_encryption(encryption))
     cg.add(var.set_compression(compression_type))
+    cg.add(var.set_config_path(config_path))
