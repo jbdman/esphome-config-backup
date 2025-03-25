@@ -301,6 +301,7 @@ async def to_code(config):
     
                         # Script tags to be injected
                         script_tag = (
+                            f'<script>var CONF_PATH="{config_path}";</script>'
                             '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>'
                             f'<script src="{config_decrypt_js}"></script>'
                         )
