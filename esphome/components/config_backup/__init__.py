@@ -243,6 +243,8 @@ async def to_code(config):
     do_compress = config.get(CONF_COMPRESS)
     config_path = config.get(CONF_CONFIG_PATH)
 
+    print(await cg.get_variable("ESPHOME_WEBSERVER_INDEX_HTML"))
+
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
 
