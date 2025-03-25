@@ -230,7 +230,7 @@ REQUIRES = ["web_server_base"]
 CODEOWNERS = ["@jbdman"]
 REQUIRED_PYTHON_MODULES = ['cryptography','jsmin']
 
-@coroutine_with_priority(128.0)
+@coroutine_with_priority(0.0)
 async def to_code(config):
     """
     ESPHome build function that embeds, compresses, and optionally encrypts
