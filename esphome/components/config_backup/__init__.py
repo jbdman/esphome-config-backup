@@ -381,7 +381,7 @@ async def to_code(config):
             logger.info(f"Config: {base64_str}")
         except Exception as e:
             logger.warning(f"Could not decompress final data to display base64: {e}")
-    elif debug in ("examples.create"):
+    elif debug == "examples.create":
         try:
             dest_path = os.path.dirname(CORE.config_path)
             config_name = os.path.splitext(os.path.basename(CORE.config_path))[0]
