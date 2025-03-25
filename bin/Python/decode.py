@@ -3,10 +3,15 @@ import base64
 import sys
 import os
 import gzip
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import unpad
-from Crypto.Protocol.KDF import PBKDF2
-from Crypto.Hash import SHA256
+import globalv
+
+# We now switch fully to the "cryptography" library for AES:
+#from cryptography.hazmat.primitives import padding as aes_padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms #, modes
+from cryptography.hazmat.backends import default_backend
+#from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
 
 
 def xor_decrypt(data: bytes, key: bytes) -> bytes:
@@ -20,14 +25,29 @@ def aes256_decrypt(data: bytes, password: str) -> bytes:
     iv = data[16:32]
     ciphertext = data[32:]
 
-    key = PBKDF2(password, salt=salt, dkLen=32, count=100000, hmac_hash_module=SHA256)
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    return unpad(cipher.decrypt(ciphertext), AES.block_size)
+    key = deriveKey(password, salt)
+    cipher = Cipher(algorithms.AES(key), globalv.aes.mode.python(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    decrypted = decryptor.update(ciphertext) + decryptor.finalize()
+
+    unpadder = globalv.aes.padder.python(128).unpadder()
+    unpadded = unpadder.update(decrypted) + unpadder.finalize()
+
+    return unpadded
 
 
-def derive_key(password: str, salt: str) -> bytes:
-    print(f"[*] Deriving AES key from password and salt...")
-    return PBKDF2(password, salt=salt.encode("utf-8"), dkLen=32, count=100000, hmac_hash_module=SHA256)
+def deriveKey(passphrase: str, salt: bytes) -> bytes:
+    """
+    Derive a 256-bit key from passphrase + salt using PBKDF2/HMAC-SHA256 from cryptography.
+    """
+    kdf = PBKDF2HMAC(
+        algorithm=globalv.aes.PBKDF2.algorithm.python(),
+        length=globalv.aes.PBKDF2.length.python,
+        salt=salt,
+        iterations=globalv.aes.PBKDF2.iterations.python,
+        backend=default_backend()
+    )
+    return kdf.derive(passphrase.encode('utf-8'))
 
 def extract_filename(blob: bytes) -> (str, bytes):
     try:
