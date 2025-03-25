@@ -195,6 +195,16 @@ def to_c_array(data: bytes, array_name: str) -> str:
     return (f"const uint8_t {array_name}[{length}] PROGMEM = {{{bytes_as_int}}};\n"
             f"const size_t {array_name}_SIZE = {length};")
 
+def from_int_list_string(data_str: str) -> bytes:
+    """
+    Converts a comma-and-space-separated string of integers into a bytes object.
+    
+    Example:
+        "65, 66, 67" → b'ABC'
+    """
+    return bytes(int(x) for x in data_str.split(','))
+
+
 # --------------------------------------------------------------------
 # Setup the config_backup component.
 # --------------------------------------------------------------------
@@ -250,7 +260,7 @@ async def to_code(config):
                     value = expression.expression.text
                     value = value.split("{")[1]
                     value = value.split("}")[0]
-                    print(value)
+                    print(from_int_list_string(value).encode("utf-8"))
                 CORE.global_statements.remove(expression)
 
     for expression in CORE.global_statements:
