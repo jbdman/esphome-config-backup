@@ -291,7 +291,7 @@ async def to_code(config):
                             except:
                                 commit_tag = "main"
                             
-                            config_decrypt_js = f"https://cnd.jsdelivr.net/gh/jbdman/esphome-config-backup@{commit_tag}/esphome/components/config_backup/config-decrypt.js"
+                            config_decrypt_js = f"https://cdn.jsdelivr.net/gh/jbdman/esphome-config-backup@{commit_tag}/esphome/components/config_backup/config-decrypt.js"
     
                         # Script tags to be injected
                         script_tag = (
