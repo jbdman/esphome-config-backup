@@ -268,7 +268,7 @@ async def to_code(config):
                     INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')[1]
                     print(INDEX_HTML)
                     final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
-                    print(f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY), f"{{{final_int_string}}}")
+                    print((f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY)).strip(), f"{{{final_int_string}}};")
                 # CORE.global_statements.remove(expression)
 
     # Define C preprocessor macro for config path
