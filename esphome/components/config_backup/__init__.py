@@ -244,7 +244,7 @@ async def to_code(config):
     config_path = config.get(CONF_CONFIG_PATH)
 
     for expression in CORE.global_statements:
-        if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression:
+        if "ESPHOME_WEBSERVER_INDEX_HTML" in expression.expression.text:
             print(expression)
 
     # Define C preprocessor macro for config path
