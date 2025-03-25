@@ -2,8 +2,7 @@
 
 /**
  * @file config_backup.h
- * @brief Provides backup and retrieval of ESPHome configuration data, including optional injection
- *        of decryption scripts and middleware for a web-based interface.
+ * @brief Provides backup and retrieval of ESPHome configuration data, including optional javascript
  */
 
 #include "esphome/core/component.h"
@@ -101,7 +100,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
    */
   void handleRequest(AsyncWebServerRequest *request) override {
     // Serve the Base64-encoded config data
-    if (request->url() == ESPHOME_CONFIG_BACKUP_CONFIG_PATH) {
+    if (request->url() == this->config_path) {
       AsyncWebServerResponse *response = request->beginResponse_P(
         200, "text/plain", CONFIG_B64, CONFIG_B64_SIZE
       );
