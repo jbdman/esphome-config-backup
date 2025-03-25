@@ -244,7 +244,7 @@ async def to_code(config):
     config_path = config.get(CONF_CONFIG_PATH)
 
     for expression in CORE.global_statements:
-        if type(expression.expression) == type(cg.RawExpression):
+        if type(expression.expression) == cg.RawExpression:
             print(expression)
 
     # Define C preprocessor macro for config path
