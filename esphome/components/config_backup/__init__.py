@@ -301,7 +301,8 @@ async def to_code(config):
                     logger.info("This code is reached!")
                     value = expression.expression.text
                     INDEX_HTML_SIZE = value.split('=')[0]
-                #CORE.global_statements.remove(expression)
+
+                print("CORE.global_statements.remove(expression)")
 
     if not None in (INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE):
         final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
