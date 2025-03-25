@@ -261,6 +261,8 @@ async def to_code(config):
                     [INDEX_HTML_KEY, value] = value.split("{")
                     value = value.split("}")[0]
                     INDEX_HTML = from_int_list_string(value).decode("utf-8")
+                    INDEX_HTML_KEY = INDEX_HTML_KEY.split('[')
+                    INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')
                     print(INDEX_HTML)
                     print(INDEX_HTML_KEY)
                 # CORE.global_statements.remove(expression)
