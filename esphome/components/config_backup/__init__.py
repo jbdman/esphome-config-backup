@@ -297,7 +297,7 @@ async def to_code(config):
                                 logger.warning("Failed to extract git user and repo name")
                                 user_repo = "jbdman/esphome-config-backup"
                             
-                            config_decrypt_js = f"https://cdn.jsdelivr.net/gh/{user_repo}@{commit_tag}/esphome/components/config_backup/config-decrypt.js"
+                            config_decrypt_js = f"https://cdn.jsdelivr.net/gh/{user_repo}@{commit_tag}/cdn/config-decrypt.js"
     
                         # Script tags to be injected
                         script_tag = (
