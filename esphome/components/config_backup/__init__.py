@@ -11,7 +11,7 @@ from esphome import git
 from esphome.components import web_server_base
 from esphome.components.web_server_base import CONF_WEB_SERVER_BASE_ID
 from esphome.const import CONF_ID
-from esphome.core import CORE, coroutine_with_priority
+from esphome.core import CORE, ID, coroutine_with_priority
 
 # --------------------------------------------------------------------
 # Setup Python logging
