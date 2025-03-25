@@ -304,9 +304,9 @@ async def to_code(config):
 
     # Log the embed status.
     if encryption == 'none':
-        logger.info("Embedding config without encryption")
+        logger.info("Embedded config without encryption")
     else:
-        logger.info(f"Encrypting config using {encryption.upper()}")
+        logger.info(f"Encrypted and embedded config using {encryption.upper()}")
 
     if do_compress:
         cg.add_define("ESPHOME_CONFIG_BACKUP_COMPRESS")
