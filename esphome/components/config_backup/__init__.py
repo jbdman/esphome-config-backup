@@ -243,7 +243,8 @@ async def to_code(config):
     do_compress = config.get(CONF_COMPRESS)
     config_path = config.get(CONF_CONFIG_PATH)
 
-    print(CORE.global_statements)
+    for expression in CORE.global_statements:
+        print(expression.text)
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
