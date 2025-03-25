@@ -263,7 +263,7 @@ async def to_code(config):
     config_path = config.get(CONF_CONFIG_PATH)
     javascript_location = config.get(CONF_JAVASCRIPT)
 
-    INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE = None
+    INDEX_HTML = INDEX_HTML_KEY = INDEX_HTML_SIZE = None
 
     for expression in CORE.global_statements:
         if type(expression.expression) == cg.RawExpression:
