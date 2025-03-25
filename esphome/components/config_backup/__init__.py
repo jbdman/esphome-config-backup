@@ -195,6 +195,9 @@ def to_c_array(data: bytes, array_name: str) -> str:
     return (f"const uint8_t {array_name}[{length}] PROGMEM = {{{bytes_as_int}}};\n"
             f"const size_t {array_name}_SIZE = {length};")
 
+def to_int_list_string(data: bytes) -> str:
+    return ", ".join(str(b) for b in data)
+
 def from_int_list_string(data_str: str) -> bytes:
     """
     Converts a comma-and-space-separated string of integers into a bytes object.
@@ -264,7 +267,7 @@ async def to_code(config):
                     INDEX_HTML_KEY = INDEX_HTML_KEY.split('[')
                     INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')[1]
                     print(INDEX_HTML)
-                    print(f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY))
+                    print(f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY), f"{{{to_int_list_string(INDEX_HTML)}}}")
                 # CORE.global_statements.remove(expression)
 
     # Define C preprocessor macro for config path
