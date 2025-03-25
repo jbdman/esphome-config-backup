@@ -273,11 +273,10 @@ async def to_code(config):
                     INDEX_HTML = from_int_list_string(value).decode("utf-8")
                     INDEX_HTML_KEY = INDEX_HTML_KEY.split('[')
                     INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')[1]
-                    print(INDEX_HTML)
 
                     config_decrypt_js = "/config-decrypt.js"
                     if javascript_location == "remote":
-
+                        cg.add_define("ESPHOME_CONFIG_BACKUP_NOJS")
                         try:
                             commit_tag = git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty'], ROOT_COMPONENT_PATH)
                         except:
@@ -296,11 +295,12 @@ async def to_code(config):
                     if insert_pos != -1:
                         INDEX_HTML = INDEX_HTML[:insert_pos] + script_tag + INDEX_HTML[insert_pos:]
 
-                    print(INDEX_HTML)
-
                     final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
                     final_expression = (f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
-                # CORE.global_statements.remove(expression)
+                else:
+                    value = expression.expression.text
+                    print(value)
+                #CORE.global_statements.remove(expression)
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
