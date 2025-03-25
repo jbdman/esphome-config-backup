@@ -53,19 +53,21 @@ ensure_package('mini-racer', 'py_mini_racer')
 # --------------------------------------------------------------------
 # Git submodule initialization if needed.
 # --------------------------------------------------------------------
+ROOT_COMPONENT_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..")
+
 submodule_status = git.run_git_command([
     "git", "submodule", "status"
-], os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+], ROOT_COMPONENT_PATH)
 
 if submodule_status.startswith('-'):
     logger.info("Initializing submodules...")
     git.run_git_command([
         "git", "submodule", "update", "--init"
-    ], os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+    ], ROOT_COMPONENT_PATH)
 
 # Add custom path for additional Python modules.
 sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "bin", "Python")
+    os.path.join(ROOT_COMPONENT_PATH, "bin", "Python")
 )
 import globalv
 import uglify_wrapper
@@ -280,7 +282,7 @@ async def to_code(config):
 
                     print(INDEX_HTML)
 
-                    print(git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty']))
+                    print(git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty'], ROOT_COMPONENT_PATH))
 
                     final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
                     final_expression = (f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
