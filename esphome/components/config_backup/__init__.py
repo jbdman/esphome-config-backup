@@ -260,8 +260,8 @@ async def to_code(config):
                     value = expression.expression.text
                     value = value.split("{")[1]
                     value = value.split("}")[0]
-                    print(from_int_list_string(value).decode("utf-8"))
-                CORE.global_statements.remove(expression)
+                    INDEX_HTML = from_int_list_string(value).decode("utf-8")
+                # CORE.global_statements.remove(expression)
 
     for expression in CORE.global_statements:
         print(expression)
