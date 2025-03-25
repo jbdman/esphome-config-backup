@@ -64,8 +64,8 @@ def main():
     parser.add_argument("--key", help="Decryption key (required for some encryption types)")
     parser.add_argument("--encryption", choices=["none", "xor", "aes256"], default="none",
                         help="Encryption type used when embedding (default: none)")
-    parser.add_argument("--compression", choices=["none","gzip"], default="none",
-                        help="Compression type used when embedding (default: none)"),
+    parser.add_argument("--compression", choices=["none","gzip"], default="gzip",
+                        help="Compression type used when embedding (default: gzip)"),
     parser.add_argument("-o", "--output", nargs="?", const=True,
                         help="Write output to file. If no filename is given, use embedded filename.")
 
