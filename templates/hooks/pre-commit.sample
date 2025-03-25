@@ -1,0 +1,12 @@
+#!/bin/sh
+# Designated file to watch
+WATCHED_FILE="esphome/components/config_backup/config-decrypt.js"
+# Python script to run
+PYTHON_SCRIPT="bin/Python/process_javascript.py"
+# Check if the file was changed in the last commit
+if git diff HEAD --no-commit-id --name-only | grep -q "^$WATCHED_FILE$"; then
+    echo "Detected changes in $WATCHED_FILE, running $PYTHON_SCRIPT..."
+    python "$PYTHON_SCRIPT"
+else
+    echo "No changes in $WATCHED_FILE, skipping derivative generation."
+fi
