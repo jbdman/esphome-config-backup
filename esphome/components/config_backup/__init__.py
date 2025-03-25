@@ -227,7 +227,10 @@ CONF_DEBUG = "debug"
 CONF_GUI = "gui"
 CONF_COMPRESS = "compress"
 CONF_CONFIG_PATH = "config_path"
+CONF_JAVASCRIPT = "javascript_location"
+
 ENCRYPTION_TYPES = ["none", "xor", "aes256"]
+JAVASCRIPT_LOCATIONS = ["remote", "local"]
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(ConfigBackup),
@@ -235,6 +238,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_ENCRYPTION, default="none"): cv.one_of(*ENCRYPTION_TYPES, lower=True),
     cv.Optional(CONF_GUI, default=True): cv.boolean,
     cv.Optional(CONF_COMPRESS, default=True): cv.boolean,
+    cv.Optional(CONF_JAVASCRIPT, default="remote"): cv.one_of(*JAVASCRIPT_LOCATIONS),
     cv.Optional(CONF_KEY): cv.string,
     cv.Optional(CONF_DEBUG): cv.string,
     cv.Optional(CONF_CONFIG_PATH, default="/config.b64"): cv.string
@@ -257,6 +261,7 @@ async def to_code(config):
     gui = config.get(CONF_GUI)
     do_compress = config.get(CONF_COMPRESS)
     config_path = config.get(CONF_CONFIG_PATH)
+    javascript_location = config.get(CONF_JAVASCRIPT)
 
     for expression in CORE.global_statements:
         if type(expression.expression) == cg.RawExpression:
@@ -269,10 +274,21 @@ async def to_code(config):
                     INDEX_HTML_KEY = INDEX_HTML_KEY.split('[')
                     INDEX_HTML_KEY[1] = INDEX_HTML_KEY[1].split(']')[1]
                     print(INDEX_HTML)
+
+                    config_decrypt_js = "/config-decrypt.js"
+                    if javascript_location == "remote":
+
+                        try:
+                            commit_tag = git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty'], ROOT_COMPONENT_PATH)
+                        except:
+                            commit_tag = "main"
+                        
+                        config_decrypt_js = f"https://cnd.jsdelivr.net/gh/jbdman/esphome-config-backup@{commit_tag}/esphome/components/config_backup/config-decrypt.js"
+
                     # Script tags to be injected
                     script_tag = (
                         '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>'
-                        '<script src="/config-decrypt.js"></script>'
+                        f'<script src="{config_decrypt_js}"></script>'
                     )
                     
                     # Find where to inject the script tags
@@ -281,8 +297,6 @@ async def to_code(config):
                         INDEX_HTML = INDEX_HTML[:insert_pos] + script_tag + INDEX_HTML[insert_pos:]
 
                     print(INDEX_HTML)
-
-                    print(git.run_git_command(['git', 'describe', '--tags', '--always', '--dirty'], ROOT_COMPONENT_PATH))
 
                     final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
                     final_expression = (f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
