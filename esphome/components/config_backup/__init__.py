@@ -294,8 +294,31 @@ async def to_code(config):
     # For debugging, if the user wants to see the final base64, we can only warn because
     # it is double-compressed.
     if debug in ("print.b64", "print.*", "*"):
-        logger.info(f"Config: {base64.b64encode(embedded_yaml)}")
-
+        try:
+            decompressed_b64 = gzip.decompress(embedded_yaml)
+            base64_str = decompressed_b64.decode('utf-8', errors='ignore')
+            logger.info(f"Config: {base64_str}")
+        except Exception as e:
+            logger.warning(f"Could not decompress final data to display base64: {e}")
+    else if debug in ("examples.create"):
+        try:
+            dest_path = os.path.dirname(CORE.config_path)
+            config_name = os.path.splitext(os.path.basename(CORE.config_path))[0]
+            for crypt in ENCRYPTION_TYPES:
+                dest_file = os.path.join(dest_path, f"{config_name}-config-{crypt}-{key}")
+                with open(dest_file, "w") as f:
+                    f.write(embedFile(
+                                path=yaml_file,
+                                read_mode='binary',
+                                add_filename_comment=True,
+                                compress_first=do_compress,
+                                encrypt=crypt,
+                                key=key,
+                                final_base64=True,
+                                compress_after_b64=False
+                            ))
+        except Exception as e:
+            logger.warning(f"Could not create examples: {e}")
     # Convert final YAML data to a C++ array.
     yaml_c_array = to_c_array(embedded_yaml, "CONFIG_B64")
     lines = yaml_c_array.split("\n")
