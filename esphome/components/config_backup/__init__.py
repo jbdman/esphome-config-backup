@@ -269,8 +269,8 @@ async def to_code(config):
                     print(INDEX_HTML)
                     # Script tags to be injected
                     script_tag = (
-                        '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>\n'
-                        '<script src="/config-decrypt.js"></script>\n'
+                        '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>'
+                        '<script src="/config-decrypt.js"></script>'
                     )
                     
                     # Find where to inject the script tags
