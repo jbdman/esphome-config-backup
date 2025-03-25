@@ -309,6 +309,7 @@ async def to_code(config):
         cg.add_global(cg.RawExpression(final_expression))
         cg.add_global(cg.RawExpression(final_size_expression))
     else:
+        logger.warning(f"INDEX_HTML: {INDEX_HTML}\nINDEX_HTML_KEY: {INDEX_HTML_KEY}\nINDEX_HTML_SIZE: {INDEX_HTML_SIZE}")
         raise Exception("Missing value from parsing INDEX_HTML. Please report this.")
 
 
