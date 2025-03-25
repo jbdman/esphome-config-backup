@@ -96,6 +96,7 @@ class ConfigBackup : public esphome::Component, public AsyncWebHandler {
       // Include encryption metadata
       response->addHeader("X-Encryption-Type", this->encryption);
 
+      //TODO: Change this to a string variable, this is frankly gross
       #ifdef ESPHOME_CONFIG_BACKUP_COMPRESS
         response->addHeader("X-Compression-Type", "gzip");
       #endif
