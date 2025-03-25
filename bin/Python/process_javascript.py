@@ -6,8 +6,7 @@ repository_root = os.path.join(os.path.dirname(__file__), "..", "..")
 javascript_file = os.path.join(repository_root, "esphome/components/config_backup/config-decrypt.js")
 output_path = os.path.join(repository_root, "cdn/config-decrypt.js")
 
-placeholder_replace={"{{path}}": "/config.b64", 
-                     "{{aes.padder}}": globalv.aes.padder.javascript,
+placeholder_replace={"{{aes.padder}}": globalv.aes.padder.javascript,
                      "{{aes.mode}}": globalv.aes.mode.javascript,
                      "{{aes.PBKDF2.algorithm}}": globalv.aes.PBKDF2.algorithm.javascript,
                      "{{aes.PBKDF2.iterations}}": globalv.aes.PBKDF2.iterations.javascript,
