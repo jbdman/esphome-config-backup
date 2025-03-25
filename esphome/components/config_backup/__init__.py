@@ -11,7 +11,7 @@ from esphome import git
 from esphome.components import web_server_base
 from esphome.components.web_server_base import CONF_WEB_SERVER_BASE_ID
 from esphome.const import CONF_ID
-from esphome.core import CORE, ID, coroutine_with_priority
+from esphome.core import CORE, coroutine_with_priority
 
 # --------------------------------------------------------------------
 # Setup Python logging
@@ -243,7 +243,7 @@ async def to_code(config):
     do_compress = config.get(CONF_COMPRESS)
     config_path = config.get(CONF_CONFIG_PATH)
 
-    print(await cg.get_variable(ID("ESPHOME_WEBSERVER_INDEX_HTML")))
+    print(CORE.global_statements)
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
