@@ -301,15 +301,15 @@ async def to_code(config):
                     logger.info("This code is reached!")
                     value = expression.expression.text
                     INDEX_HTML_SIZE = value.split('=')[0]
-                CORE.global_statements.remove(expression)
+                #CORE.global_statements.remove(expression)
 
     if not None in (INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE):
         final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
         final_size = len(INDEX_HTML)
         final_expression = (f'[{final_size}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
         final_size_expression = INDEX_HTML_SIZE + f"= {final_size}"
-        cg.add_global(cg.RawExpression(final_expression))
-        cg.add_global(cg.RawExpression(final_size_expression))
+        #cg.add_global(cg.RawExpression(final_expression))
+        #cg.add_global(cg.RawExpression(final_size_expression))
     else:
         logger.warning(f"INDEX_HTML: {INDEX_HTML}\nINDEX_HTML_KEY: {INDEX_HTML_KEY}\nINDEX_HTML_SIZE: {INDEX_HTML_SIZE}")
         raise Exception("Missing value from parsing INDEX_HTML. Please report this.")
