@@ -294,13 +294,20 @@ async def to_code(config):
                     insert_pos = INDEX_HTML.find("</body>")
                     if insert_pos != -1:
                         INDEX_HTML = INDEX_HTML[:insert_pos] + script_tag + INDEX_HTML[insert_pos:]
-
-                    final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
-                    final_expression = (f'[{len(INDEX_HTML)}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
                 else:
                     value = expression.expression.text
-                    print(value)
-                #CORE.global_statements.remove(expression)
+                    INDEX_HTML_SIZE = value.split('=')[0]
+                CORE.global_statements.remove(expression)
+    if not None in (INDEX_HTML, INDEX_HTML_KEY, INDEX_HTML_SIZE):
+        final_int_string = to_int_list_string(INDEX_HTML.encode("utf-8"))
+        final_size = len(INDEX_HTML)
+        final_expression = (f'[{final_size}]'.join(INDEX_HTML_KEY)) + f"{{{final_int_string}}};"
+        final_size_expression = INDEX_HTML_SIZE + f"= {final_size}"
+        cg.add_global(cg.RawExpression(final_expression))
+        cg.add_global(cg.RawExpression(final_size_expression))
+    else:
+        raise Exception("Missing value from parsing INDEX_HTML. Please report this.")
+
 
     # Define C preprocessor macro for config path
     cg.add_define("ESPHOME_CONFIG_BACKUP_CONFIG_PATH", config_path)
