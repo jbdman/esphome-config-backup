@@ -1,0 +1,8 @@
+encryptor = Encryptor('aes256','mysecretkey')
+
+with open('E:\\Git Repositories\\esphome-config-backup\\example.yaml', 'r', encoding='utf-8') as f:
+		raw_str = f.read()
+		data = raw_str.encode('utf-8')
+
+import base64
+print(base64.b64encode(encryptor.encrypt(data)))
