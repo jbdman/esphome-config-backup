@@ -55,6 +55,8 @@ class Encryptor:
 	def reset(self):
 		del self._key
 		del self._salt
+		del self._encryptor
+		del self.type
 
 	def set_passphrase(self, passphrase: str):
 		self._salt = secrets.token_bytes(16)
