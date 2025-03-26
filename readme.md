@@ -1,5 +1,7 @@
 # ESPHome Config Backup Component
 
+**NOTE: This project is really still a Proof of Concept at this point. It works, but I don't know that I'd be ready to throw it on a production device.**
+
 This project provides a custom ESPHome component for backing up a device's active configuration. It embeds the encoded, compressed, and encrypted yaml config in the embedded firmware. It allows export of the config via a web interface, supporting AES256 encryption, XOR, and plaintext.
 
 ## 🧩 Features
