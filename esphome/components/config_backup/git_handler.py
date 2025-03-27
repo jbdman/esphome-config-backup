@@ -1,5 +1,5 @@
 from esphome import git
-import utils
+from . import utils
 
 def init_submodules(path=utils.root_path):
     utils.logger.info("Initializing submodules...")
