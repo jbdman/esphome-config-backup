@@ -13,6 +13,8 @@ class CustomAdapter(logging.LoggerAdapter):
 
 logger = CustomAdapter(logging.getLogger(__name__))
 
+root_path = os.path.join(os.path.dirname(__file__), "..", "..")
+
 
 def ensure_package(package_name, import_name=None):
     """
@@ -34,36 +36,3 @@ def ensure_package(package_name, import_name=None):
         else:
             logger.error(f"Please install '{package_name}' manually and re-run.")
             sys.exit(1)
-
-async def setup_component(config):
-    """Set up the ConfigBackup component with the provided configuration.
-    
-    Args:
-        config: Configuration dictionary containing component settings
-        
-    Returns:
-        The configured ConfigBackup component variable
-    """
-    # Get required components
-    var = cg.new_Pvariable(config[CONF_ID])
-    web_server = await cg.get_variable(config[web_server_base.CONF_WEB_SERVER_BASE_ID])
-    
-    # Register as a component
-    await cg.register_component(var, config)
-    
-    # Add the web server base reference
-    cg.add(var.set_parent(web_server))
-    
-    # Set encryption type
-    if "encryption" in config:
-        cg.add(var.set_encryption(config["encryption"]))
-        
-    # Set compression type
-    if "compression" in config:
-        cg.add(var.set_compression(config["compression"]))
-        
-    # Set config path
-    if "config_path" in config:
-        cg.add(var.set_config_path(config["config_path"]))
-    
-    return var
