@@ -3,9 +3,9 @@
 import esphome.codegen as cg
 from esphome.core import CORE
 import logging
-import utils
-import git_handler as git
-import file_handling as fileh
+from . import utils
+from . import git_handler as git
+from . import file_handling as fileh
 
 logger = utils.CustomAdapter(logging.getLogger(__name__))
 
