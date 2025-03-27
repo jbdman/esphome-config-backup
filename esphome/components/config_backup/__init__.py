@@ -7,18 +7,17 @@ import logging
 
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome import git
 from esphome.components import web_server_base
 from esphome.components.web_server_base import CONF_WEB_SERVER_BASE_ID
 from esphome.const import CONF_ID
 from esphome.core import CORE, coroutine_with_priority
 
-import utils
-import git_handler as git
-import web_interface as web
-import file_handling as fileh
+from . import utils
+from . import git_handler as git
+from . import web_interface as web
+from . import file_handling as fileh
 
-import globalv
+from . import globalv
 
 utils.ensure_package('cryptography')
 
