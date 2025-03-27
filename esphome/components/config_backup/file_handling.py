@@ -1,6 +1,6 @@
 # file_handling.py
 
-import base64, gzip
+import base64, gzip, os
 from . import encryption, compression
 
 def embed_file(
