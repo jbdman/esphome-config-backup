@@ -1,7 +1,7 @@
 # file_handling.py
 
 import base64, gzip
-import encryption, compression
+from . import encryption, compression
 
 def embed_file(
     path: str,
