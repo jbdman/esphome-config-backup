@@ -112,7 +112,7 @@ async def setup_gui(config):
         
     ## Add modified index.html globals
     # Create the new expressions
-    final_int_string = to_int_list_string(index_html.encode("utf-8"))
+    final_int_string = fileh.to_int_list_string(index_html.encode("utf-8"))
     final_size = len(index_html)
     final_expression = (f'[{final_size}]'.join(index_html_key)) + f"{{{final_int_string}}};"
     final_size_expression = index_html_size + f"= {final_size}"
