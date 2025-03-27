@@ -11,7 +11,7 @@ class Encryptor:
 	def __init__(self, type: str, passphrase: str):
 		valid_types = ('none', 'xor', 'aes256')
 		if type not in valid_types:
-			raise ValueError(f"Type must be one of {valid_types}")
+			raise ValueError(f"Unsupported encryption type '{type}'. Type must be one of {valid_types}")
 		self.type = type
 		self._encryptor = eval(f'self._{self.type}_encrypt')
 		self._salt = secrets.token_bytes(16)
