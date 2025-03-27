@@ -108,15 +108,17 @@ async def setup_gui(config):
     
     # Remove old globals and add new ones
     for expr in to_remove:
+        # logger.info(f"Removing {expr.expression.text}")
         CORE.global_statements.remove(expr)
         
     ## Add modified index.html globals
     # Create the new expressions
-    final_int_string = fileh.to_int_list_string(index_html.encode("utf-8"))
-    final_size = len(index_html)
+    final_int_string = fileh.to_int_list_string(modified_html.encode("utf-8"))
+    final_size = len(modified_html)
     final_expression = (f'[{final_size}]'.join(index_html_key)) + f"{{{final_int_string}}};"
     final_size_expression = index_html_size + f"= {final_size}"
 
+    # logger.info("Adding the new index.html")
     # Add the new expressions
     cg.add_global(cg.RawExpression(final_expression))
     cg.add_global(cg.RawExpression(final_size_expression))
