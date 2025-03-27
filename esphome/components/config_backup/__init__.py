@@ -87,7 +87,7 @@ async def to_code(config):
 
     # If GUI is enabled, inject index.html
     if gui:
-        web.setup_gui(config)
+        await web.setup_gui(config)
 
     # Embed the main YAML.
     yaml_file = CORE.config_path
