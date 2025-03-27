@@ -108,9 +108,9 @@ async def to_code(config):
         try:
             decompressed_b64 = gzip.decompress(embedded_yaml)
             base64_str = decompressed_b64.decode('utf-8', errors='ignore')
-            logger.info(f"Config: {base64_str}")
+            utils.logger.info(f"Config: {base64_str}")
         except Exception as e:
-            logger.warning(f"Could not decompress final data to display base64: {e}")
+            utils.logger.warning(f"Could not decompress final data to display base64: {e}")
     elif debug == "examples.create":
         try:
             dest_path = os.path.dirname(CORE.config_path)
@@ -129,7 +129,7 @@ async def to_code(config):
                                 compress_after_b64=False
                             ).decode("utf-8"))
         except Exception as e:
-            logger.warning(f"Could not create examples: {e}")
+            utils.logger.warning(f"Could not create examples: {e}")
 
 
     # Convert final YAML data to a C++ array.
@@ -142,9 +142,9 @@ async def to_code(config):
 
     # Log the embed status.
     if encryption == 'none':
-        logger.info("Embedded config without encryption")
+        utils.logger.info("Embedded config without encryption")
     else:
-        logger.info(f"Encrypted and embedded config using {encryption.upper()}")
+        utils.logger.info(f"Encrypted and embedded config using {encryption.upper()}")
 
     # Create the component instance
     server = await cg.get_variable(config[CONF_WEB_SERVER_BASE_ID])
