@@ -1,13 +1,14 @@
 # file_handling.py
 
-import base64
-from . import encryption, compression
+import base64, gzip
+import encryption, compression
 
-def embedFile(
+def embed_file(
     path: str,
     read_mode: str = 'text',
     placeholder_replace: dict = None,
     mangle: callable = None,
+    compressor: str = 'gzip',
     compress_first: bool = True,
     encrypt: str = 'none',
     key: str = None,
@@ -20,6 +21,9 @@ def embedFile(
     do placeholder replacement, minify if needed, compress, encrypt, base64, etc.
     Returns the final bytes, suitable for embedding.
     """
+    _compressor = compression.Compressor(compressor)
+    _encryptor = encryption.Encryptor(encrypt, key)
+
     if read_mode == 'text':
         with open(path, 'r', encoding='utf-8') as f:
             raw_str = f.read()
@@ -43,27 +47,15 @@ def embedFile(
         data = mangle(data)
 
     if compress_first:
-        data = gzip.compress(data)
+        data = _compressor.compress(data)
 
-    if encrypt == 'xor':
-        if not key:
-            raise ValueError("XOR encryption requires a 'key'.")
-        data = xor_encrypt(data, key.encode('utf-8'))
-    elif encrypt == 'aes256':
-        if not key:
-            raise ValueError("AES-256 encryption requires a 'key'.")
-        salt_bytes = secrets.token_bytes(16)
-        derived_key = deriveKey(key, salt_bytes)
-        data = salt_bytes + aes256_encrypt(data, derived_key)
-    elif encrypt == 'none':
-        pass
-    else:
-        raise ValueError(f"Unsupported encryption type: {encrypt}")
+    data = _encryptor.encrypt(data)
 
     if final_base64:
         data = base64.b64encode(data)
 
     if compress_after_b64:
+    	# We always compress with gzip if we're compressing aftwerwards, this file is intended for a webserver
         data = gzip.compress(data)
 
     return data
